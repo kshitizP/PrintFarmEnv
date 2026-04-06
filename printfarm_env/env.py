@@ -129,9 +129,7 @@ class PrintFarmEnvironment(BaseEnvironment):
                     if p.spool_weight_g <= 0:
                         p.state = PrinterState.ERROR
                         j.state = JobState.FAILED
-                        # Wait, for task2 runout let's mark it
-                        if self.grader:
-                            self.grader.task2_failed_mid = True
+                            
                             
                     elif self.current_task_id == "task_3" and j.progress_steps == 5:
                         p.state = PrinterState.ERROR

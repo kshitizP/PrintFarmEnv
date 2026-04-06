@@ -7,7 +7,7 @@ echo "========================================"
 
 echo "[1/4] Checking openenv-core schema validation..."
 if command -v openenv &> /dev/null; then
-    openenv validate locally
+    openenv validate .
     echo "✅ OpenEnv schema passed validation!"
 else
     echo "⚠️ 'openenv' CLI tool not found. Trying python validation..."

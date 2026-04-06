@@ -76,7 +76,6 @@ class TaskGrader:
         self.task1_collision = False
         self.task2_swapped_before_start = False
         self.task2_started = False
-        self.task2_failed_mid = False
         self.task3_downtime = 0
         self.task3_completed = False
         self.initial_time = 0
@@ -133,10 +132,12 @@ class TaskGrader:
             if heavy_job and heavy_job.state == JobState.COMPLETED:
                 return 1.0
             
-            if self.task2_failed_mid:
-                return 0.5
-            elif heavy_job and heavy_job.state == JobState.FAILED:
-                return 0.5
+            if heavy_job and heavy_job.state == JobState.FAILED:
+                # If job progressed before failing, it ran out of filament mid-print
+                if heavy_job.progress_steps > 0:
+                    return 0.5
+                # Otherwise, it failed to start entirely
+                return 0.0
                 
             return 0.0
             
