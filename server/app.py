@@ -1,5 +1,10 @@
-from openenv_core import create_app
 from fastapi.responses import HTMLResponse
+
+try:
+    from openenv.core.env_server.http_server import create_app
+except ImportError:
+    from openenv_core import create_app
+
 from printfarm_env.models import FarmAction, FarmObservation
 from printfarm_env.env import PrintFarmEnvironment
 
@@ -103,4 +108,13 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "environment": "PrintFarmEnv"}
+    return {"status": "healthy", "environment": "PrintFarmEnv"}
+
+
+def main(host: str = "0.0.0.0", port: int = 7860):
+    import uvicorn
+    uvicorn.run(app, host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()

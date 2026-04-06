@@ -1,6 +1,6 @@
-name: PrintFarmEnv
-version: 1.0.0
-description: A hardware DevOps environment for managing a fleet of 3D printers and inventory.
-entry_point: printfarm_env.env:PrintFarmEnvironment
-observation_model: printfarm_env.models:FarmObservation
-action_model: printfarm_env.models:FarmAction
+spec_version: 1
+name: printfarm-env
+type: space
+runtime: fastapi
+app: server.app:app
+port: 7860

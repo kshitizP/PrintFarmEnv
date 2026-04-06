@@ -9,5 +9,10 @@ description = "A hardware DevOps environment for managing a fleet of 3D printers
 dependencies = [
     "openenv-core",
     "openai",
-    "pydantic"
+    "pydantic",
+    "fastapi",
+    "uvicorn"
 ]
+
+[project.scripts]
+server = "server.app:main"

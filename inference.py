@@ -51,22 +51,21 @@ def run_task(task_id: str, env: PrintFarmEnvironment) -> float:
     print(f"\n======================================")
     print(f"       STARTING {task_id.upper()}")
     print(f"======================================")
-    observation = env.reset(task_id)
-    done = False
-    
-    while not done:
+    observation = env.reset(episode_id=task_id)
+
+    while not observation.done:
         env.render_dashboard()
         action = extract_action(observation.model_dump_json())
         print(f"-> Agent Action: {action.action.value}")
-        
-        observation, reward, done, info = env.step_legacy(action)
-        if info.get("error"):
-            print(f"-> Action Error: {info['error']}")
-            
-        if done:
-            print(f"\n{task_id.upper()} COMPLETED. Grader Reward: {reward}")
+
+        observation = env.step(action)
+        if observation.metadata.get("error"):
+            print(f"-> Action Error: {observation.metadata['error']}")
+
+        if observation.done:
+            print(f"\n{task_id.upper()} COMPLETED. Grader Reward: {observation.reward}")
             env.render_dashboard()
-            return reward
+            return observation.reward
     return 0.0
 
 if __name__ == "__main__":

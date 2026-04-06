@@ -180,9 +180,3 @@ class PrintFarmEnvironment(_BaseEnvironment):
 
         return self._state
 
-    # ------------------------------------------------------------------ #
-    #  Legacy tuple-style step for inference.py backward compatibility    #
-    # ------------------------------------------------------------------ #
-    def step_legacy(self, action: FarmAction):
-        obs = self.step(action)
-        return (obs, obs.reward, obs.done, obs.metadata)

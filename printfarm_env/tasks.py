@@ -71,24 +71,23 @@ def load_task(task_id: str) -> FarmObservation:
 class TaskGrader:
     def __init__(self, task_id: str):
         self.task_id = task_id
-        
+
         # Tracking variables
-        self.task1_collision = False
+        self.failed_actions = 0
+        self.wasted_steps = 0
         self.task2_swapped_before_start = False
         self.task2_started = False
         self.task3_downtime = 0
         self.task3_completed = False
-        self.initial_time = 0
 
     def step_update(self, current_action, action_handled, state: FarmObservation, time_step: int):
-        if self.task_id == "task_1":
-            # Check for material collision
-            if current_action and current_action.action.value == "ASSIGN_JOB" and not action_handled:
-                # Need to be more precise: the collision should check whether a job was assigned incorrectly.
-                # If the action was rejected but maybe because of a mismatch? We'll capture that in physics.
-                pass
-                
-        elif self.task_id == "task_2":
+        # Track wasted steps (WAIT or failed actions) across all tasks
+        if current_action and current_action.action.value == "WAIT":
+            self.wasted_steps += 1
+        if current_action and not action_handled and current_action.action.value != "WAIT":
+            self.failed_actions += 1
+
+        if self.task_id == "task_2":
             if current_action and current_action.action.value == "SWAP_FILAMENT":
                 if not self.task2_started:
                     self.task2_swapped_before_start = True
@@ -96,57 +95,81 @@ class TaskGrader:
                 self.task2_started = True
 
         elif self.task_id == "task_3":
-            # Track downtime if printer 1 is in ERROR
             for p in state.printers:
                 if p.state == PrinterState.ERROR:
                     self.task3_downtime += 1
-            
-            # Check completion
+
             for job in state.active_queue:
                 if job.job_id == "job_triage" and job.state == JobState.COMPLETED:
                     self.task3_completed = True
 
     def get_score(self, state: FarmObservation) -> float:
+        # Step penalty: discourage wasted actions (-0.01 per wasted step, -0.02 per failed action)
+        step_penalty = (self.wasted_steps * 0.01) + (self.failed_actions * 0.02)
+
         if self.task_id == "task_1":
-            all_completed = all(job.state == JobState.COMPLETED for job in state.active_queue)
-            
-            # Also we shouldn't have collisions.
-            collision = any(job.state == JobState.FAILED for job in state.active_queue)
-            if collision:
+            # Penalize failures and cancellations
+            if any(j.state == JobState.FAILED for j in state.active_queue):
                 return 0.0
-                
-            # If agent just cancelled everything to "complete" the task
-            cancelled = sum(1 for job in state.active_queue if job.state == JobState.CANCELLED)
-            if cancelled > 0:
+            if any(j.state == JobState.CANCELLED for j in state.active_queue):
                 return 0.0
-                
-            if all_completed:
-                return 1.0
-            
-            completed_jobs = sum(1 for job in state.active_queue if job.state == JobState.COMPLETED)
-            return completed_jobs / len(state.active_queue)
-            
+
+            total_jobs = len(state.active_queue)
+            # Continuous progress: count completed jobs + fractional progress of in-flight jobs
+            progress = 0.0
+            for job in state.active_queue:
+                if job.state == JobState.COMPLETED:
+                    progress += 1.0
+                elif job.state == JobState.PRINTING and job.print_time_steps > 0:
+                    progress += 0.5 * (job.progress_steps / job.print_time_steps)
+
+            score = progress / total_jobs
+            return max(0.0, min(1.0, score - step_penalty))
+
         elif self.task_id == "task_2":
-            # Cancelled jobs are failures.
             heavy_job = next((j for j in state.active_queue if j.job_id == "job_heavy"), None)
-            if heavy_job and heavy_job.state == JobState.COMPLETED:
-                return 1.0
-            
-            if heavy_job and heavy_job.state == JobState.FAILED:
-                # If job progressed before failing, it ran out of filament mid-print
+            if not heavy_job:
+                return 0.0
+
+            if heavy_job.state == JobState.COMPLETED:
+                # Bonus for swapping filament proactively before starting
+                base = 0.9 if not self.task2_swapped_before_start else 1.0
+                return max(0.0, min(1.0, base - step_penalty))
+
+            if heavy_job.state == JobState.FAILED:
                 if heavy_job.progress_steps > 0:
-                    return 0.5
-                # Otherwise, it failed to start entirely
+                    return 0.3  # partial credit: tried but ran out
                 return 0.0
-                
+
+            # In-progress partial credit: reward progress toward completion
+            if heavy_job.state == JobState.PRINTING and heavy_job.print_time_steps > 0:
+                progress_frac = heavy_job.progress_steps / heavy_job.print_time_steps
+                return max(0.0, min(0.7, 0.7 * progress_frac - step_penalty))
+
+            # Job assigned but not yet printing? Small credit for having started
+            if self.task2_swapped_before_start:
+                return max(0.0, 0.1 - step_penalty)
+
             return 0.0
-            
+
         elif self.task_id == "task_3":
-            if not self.task3_completed:
-                return 0.0
-                
-            # Scale based on downtime. Max expected downtime is 10.
-            score = 1.0 - (self.task3_downtime / 10.0)
-            return max(0.2, min(1.0, score)) # Floor at 0.2 if completed
-            
+            triage_job = next((j for j in state.active_queue if j.job_id == "job_triage"), None)
+
+            if self.task3_completed:
+                # Scale based on downtime. Max expected downtime is 10.
+                efficiency = 1.0 - (self.task3_downtime / 10.0)
+                score = max(0.2, min(1.0, efficiency))
+                return max(0.0, score - step_penalty)
+
+            # Partial credit during episode: reward progress even before completion
+            if triage_job and triage_job.state == JobState.PRINTING and triage_job.print_time_steps > 0:
+                progress_frac = triage_job.progress_steps / triage_job.print_time_steps
+                return max(0.0, 0.5 * progress_frac - step_penalty)
+
+            # Job re-queued after error: small credit for being assigned at all
+            if triage_job and triage_job.state == JobState.PENDING and self.task3_downtime > 0:
+                return max(0.0, 0.05 - step_penalty)
+
+            return 0.0
+
         return 0.0
