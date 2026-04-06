@@ -1,35 +1,51 @@
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional
 from .models import FarmAction, FarmObservation, FarmActionEnum, JobState, PrinterState
 from .tasks import load_task, TaskGrader
 import copy
 
-class BaseEnvironment:
-    """Mock base class if openenv-core isn't installed."""
-    pass
-
+# Resolve the correct base class
 try:
-    from openenv_core import Environment as BaseEnvironment
+    from openenv.core import Environment as _BaseEnvironment
 except ImportError:
-    pass
+    try:
+        from openenv_core import Environment as _BaseEnvironment
+    except ImportError:
+        class _BaseEnvironment:
+            """Fallback base class when openenv is not installed."""
+            def __init__(self, **kwargs):
+                pass
 
-class PrintFarmEnvironment(BaseEnvironment):
+
+class PrintFarmEnvironment(_BaseEnvironment):
     def __init__(self):
-        self.current_task_id = None
-        self._state: FarmObservation = None
+        super().__init__()
+        self.current_task_id = "task_1"
+        self._state: FarmObservation = load_task("task_1")
         self.time_step = 0
         self.max_steps = 30
-        self.grader = None
+        self.grader = TaskGrader("task_1")
 
-    def reset(self, task_id: str) -> FarmObservation:
+    # ------------------------------------------------------------------ #
+    #  OpenEnv-compatible reset (accepts **kwargs for seed/episode_id)    #
+    # ------------------------------------------------------------------ #
+    def reset(self, seed: Optional[int] = None, episode_id: Optional[str] = None, **kwargs) -> FarmObservation:
+        task_id = kwargs.get("task_id", episode_id or "task_1")
         self.current_task_id = task_id
         self._state = load_task(task_id)
         self.time_step = 0
         self.grader = TaskGrader(task_id)
         return self._state
 
+    # ------------------------------------------------------------------ #
+    #  OpenEnv-compatible state (property, not method)                    #
+    # ------------------------------------------------------------------ #
+    @property
     def state(self) -> FarmObservation:
         return self._state
 
+    # ------------------------------------------------------------------ #
+    #  Internal helpers                                                   #
+    # ------------------------------------------------------------------ #
     def _get_printer(self, pid: int):
         for p in self._state.printers:
             if p.printer_id == pid:
@@ -58,7 +74,10 @@ class PrintFarmEnvironment(BaseEnvironment):
         print(f"Inventory: {inventory_str}")
         print("---------------------------------------------------------------")
 
-    def step(self, action: FarmAction) -> Tuple[FarmObservation, float, bool, Dict[str, Any]]:
+    # ------------------------------------------------------------------ #
+    #  OpenEnv-compatible step (returns single Observation)               #
+    # ------------------------------------------------------------------ #
+    def step(self, action: FarmAction, timeout_s: Optional[float] = None, **kwargs) -> FarmObservation:
         action_handled = False
         info = {"error": None}
 
@@ -129,13 +148,10 @@ class PrintFarmEnvironment(BaseEnvironment):
                     if p.spool_weight_g <= 0:
                         p.state = PrinterState.ERROR
                         j.state = JobState.FAILED
-                            
-                            
                     elif self.current_task_id == "task_3" and j.progress_steps == 5:
                         p.state = PrinterState.ERROR
                         j.state = JobState.PENDING # Job can be restarted/re-routed
                         p.current_job_id = None
-                    
                     elif j.progress_steps >= j.print_time_steps:
                         j.state = JobState.COMPLETED
                         p.state = PrinterState.IDLE
@@ -157,4 +173,16 @@ class PrintFarmEnvironment(BaseEnvironment):
         if all_resolved:
             done = True
 
-        return (self._state, current_score, done, info)
+        # Stamp OpenEnv-required fields onto the observation
+        self._state.reward = current_score
+        self._state.done = done
+        self._state.metadata = info
+
+        return self._state
+
+    # ------------------------------------------------------------------ #
+    #  Legacy tuple-style step for inference.py backward compatibility    #
+    # ------------------------------------------------------------------ #
+    def step_legacy(self, action: FarmAction):
+        obs = self.step(action)
+        return (obs, obs.reward, obs.done, obs.metadata)

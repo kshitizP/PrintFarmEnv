@@ -24,3 +24,4 @@ logs/
 .pytest_cache/
 htmlcov/
 .coverage
+.hf_home/

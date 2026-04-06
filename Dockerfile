@@ -9,7 +9,7 @@ WORKDIR /app
 COPY --chown=user . /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install openenv-core openai pydantic
+RUN pip install openenv-core openai pydantic fastapi uvicorn
 
-# The validation script expects the environment to be importable and responsive
-CMD ["python", "inference.py"]
+# Start the web server for Hugging Face Spaces on port 7860
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]

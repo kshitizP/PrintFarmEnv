@@ -59,7 +59,7 @@ def run_task(task_id: str, env: PrintFarmEnvironment) -> float:
         action = extract_action(observation.model_dump_json())
         print(f"-> Agent Action: {action.action.value}")
         
-        observation, reward, done, info = env.step(action)
+        observation, reward, done, info = env.step_legacy(action)
         if info.get("error"):
             print(f"-> Action Error: {info['error']}")
             

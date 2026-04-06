@@ -1,3 +1,12 @@
+---
+title: PrintFarmEnv
+emoji: 🖨️
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+---
+
 # PrintFarmEnv
 
 A hardware DevOps environment for managing a fleet of 3D printers and inventory. Built for OpenEnv hackathon.
