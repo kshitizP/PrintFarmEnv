@@ -11,80 +11,117 @@ tags:
 
 # PrintFarmEnv
 
-An OpenEnv environment that simulates managing a fleet of 10 networked 3D printers. The agent acts as an automated floor manager — assigning print jobs, swapping filament spools, triaging hardware errors, and managing material inventory — mirroring the real operational decisions made daily in commercial print farms and makerspaces.
+An OpenEnv environment that simulates managing a fleet of 10 networked 3D printers. The agent acts as an automated floor manager — assigning print jobs, swapping filament spools, performing maintenance, triaging hardware errors, and managing material inventory under time pressure and uncertainty.
 
 ## Motivation
 
-3D print farm management is a genuine, unsolved operational challenge. Farms with 10–100+ printers must continuously match incoming orders to available machines, handle mid-print failures (filament runouts, hardware jams), and minimize downtime. Current solutions rely on manual oversight or rigid rule-based schedulers. This environment provides a realistic testbed for evaluating whether AI agents can learn these coordination and recovery skills.
+3D print farm management is a genuine, unsolved operational challenge. Farms with 10–100+ printers must continuously match incoming orders to available machines, handle mid-print failures (filament runouts, random hardware jams), prioritise urgent customer orders, and schedule preventive maintenance — all with limited inventory and tight deadlines. Current solutions rely on manual oversight or rigid rule-based schedulers. This environment provides a realistic testbed for evaluating whether AI agents can learn these coordination, planning, and recovery skills under stochastic conditions.
 
 ## Action Space
 
-The agent submits one action per time step as a `FarmAction` with the following fields:
+The agent submits one `FarmAction` per time step:
 
 | Field | Type | Description |
 |---|---|---|
-| `action` | enum | One of: `ASSIGN_JOB`, `SWAP_FILAMENT`, `CANCEL_JOB`, `WAIT` |
+| `action` | enum | `ASSIGN_JOB`, `SWAP_FILAMENT`, `CANCEL_JOB`, `PERFORM_MAINTENANCE`, `WAIT` |
 | `printer_id` | int (optional) | Target printer ID (1–10) |
-| `job_id` | string (optional) | Target job ID from the active queue |
+| `job_id` | string (optional) | Target job from the active queue |
 | `material` | string (optional) | Filament type for `SWAP_FILAMENT` (e.g. `"PLA"`, `"PETG"`, `"ABS"`) |
 
 **Action details:**
-- **ASSIGN_JOB**: Assigns a pending job to an idle printer. Requires matching material and sufficient spool weight.
-- **SWAP_FILAMENT**: Replaces the filament spool on an idle/errored printer from inventory. Takes a full 1000g spool.
-- **CANCEL_JOB**: Cancels a pending or in-progress job, freeing the printer.
-- **WAIT**: Do nothing this step (penalized by the grader to discourage idle behavior).
+
+- **ASSIGN_JOB** — Starts a pending job on an idle printer. Requires matching material and sufficient spool weight. Triggers a 1-step warmup (2 steps if `purge_needed`).
+- **SWAP_FILAMENT** — Replaces the spool on an idle/errored printer with a fresh 1000g spool from inventory. Sets `purge_needed = true`. Clears ERROR state.
+- **CANCEL_JOB** — Cancels a pending or in-progress job, freeing the printer.
+- **PERFORM_MAINTENANCE** — Services an idle/errored printer (takes 3 steps). Resets `maintenance_due_in` to 50 and adds +5% reliability.
+- **WAIT** — Do nothing. Penalised by the grader.
 
 ## Observation Space
 
-Each step returns a `FarmObservation` containing:
+Each step returns a `FarmObservation`:
 
 | Field | Type | Description |
 |---|---|---|
 | `printers` | list[PrinterObservation] | State of all 10 printers |
-| `active_queue` | list[PrintJob] | All jobs and their current status |
-| `inventory` | dict[str, float] | Material inventory in grams (e.g. `{"PLA": 5000.0}`) |
+| `active_queue` | list[PrintJob] | All jobs and their statuses |
+| `inventory` | dict[str, float] | Material stock in grams |
+| `time_step` | int | Current step |
+| `max_steps` | int | Episode length |
 | `reward` | float | Current grader score (0.0–1.0) |
 | `done` | bool | Whether the episode has ended |
-| `metadata` | dict | Error messages and action feedback |
+| `metadata` | dict | Error messages from last action |
 
-**PrinterObservation fields:** `printer_id`, `state` (IDLE/PRINTING/ERROR), `current_material`, `current_job_id`, `spool_weight_g`
+**PrinterObservation:**
 
-**PrintJob fields:** `job_id`, `material_required`, `weight_required_g`, `state` (PENDING/PRINTING/COMPLETED/FAILED/CANCELLED), `print_time_steps`, `progress_steps`
+| Field | Type | Description |
+|---|---|---|
+| `printer_id` | int | Printer ID (1–10) |
+| `state` | enum | `IDLE`, `WARMING_UP`, `PRINTING`, `ERROR`, `MAINTENANCE` |
+| `current_material` | str or null | Loaded filament type |
+| `spool_weight_g` | float | Remaining filament on spool |
+| `reliability` | float | Per-step success probability while printing (0.0–1.0) |
+| `warmup_remaining` | int | Steps until printing begins (or maintenance completes) |
+| `maintenance_due_in` | int | Steps until maintenance is overdue (degrades reliability at 0) |
+| `purge_needed` | bool | True after filament swap; adds +1 warmup step |
+| `current_job_id` | str or null | Currently assigned job |
+
+**PrintJob:**
+
+| Field | Type | Description |
+|---|---|---|
+| `job_id` | str | Unique job identifier |
+| `material_required` | str | Required filament type |
+| `weight_required_g` | float | Filament needed |
+| `print_time_steps` | int | Steps to complete |
+| `priority` | int | 1=low, 2=normal, 3=urgent |
+| `deadline_steps` | int or null | Must complete by this step |
+| `state` | enum | `PENDING`, `PRINTING`, `COMPLETED`, `FAILED`, `CANCELLED` |
+| `progress_steps` | int | Steps completed so far |
+
+## Environment Mechanics
+
+- **Stochastic failures**: Each printing step, a printer can fail with probability `1 - reliability`. Failed jobs revert to `PENDING` (progress reset) and can be re-assigned to another printer.
+- **Filament runout**: If a spool runs empty mid-print, the job `FAILED` permanently and the printer enters `ERROR`.
+- **Warmup phase**: After assigning a job, the printer spends 1 step warming up (2 if `purge_needed`) before printing begins.
+- **Maintenance**: Printers degrade reliability when `maintenance_due_in` reaches 0. `PERFORM_MAINTENANCE` takes 3 steps but resets the counter and boosts reliability.
+- **Purge**: After every filament swap, the nozzle must be purged (adds 1 extra warmup step).
+- **Priorities & deadlines**: Urgent jobs (priority 3) are worth 2x in the score. Meeting deadlines gives full credit; late completion is penalised.
+- **Step penalty**: Every `WAIT` action costs -0.01 and every failed action costs -0.02.
 
 ## Tasks
 
-### Task 1: Night Shift (Easy)
-**Objective:** Assign 5 PLA print jobs across 10 printers (3 have loaded spools, others need filament swaps).
+### Task 1: Night Shift Scheduling (Easy)
+**Budget:** 20 steps | **Jobs:** 5 PLA jobs with mixed priorities
 
-The agent must recognize which printers are ready and assign jobs without material mismatches. Straightforward scheduling — no failures occur.
+Assign 5 PLA jobs across 10 printers. Three printers are loaded and reliable, two are loaded but unreliable (reliability=0.80), and five are empty. One job is urgent with a tight deadline. The agent must prioritise the urgent job on a reliable printer and manage filament swaps for remaining jobs.
 
-**Scoring:** Fractional progress across all 5 jobs. Full credit (1.0) when all jobs complete. Any failed or cancelled job scores 0.0.
+### Task 2: Material Juggle (Medium)
+**Budget:** 25 steps | **Jobs:** 3 jobs across 2 materials (PETG + ABS)
 
-### Task 2: Spool Runout (Medium)
-**Objective:** Complete a heavy 800g PETG print, but the only loaded printer has just 200g remaining.
+Three jobs requiring two different materials. Only one printer has PETG loaded (low spool), one has ABS. One printer is unreliable (reliability=0.75). The urgent PETG job has a tight deadline. Limited inventory forces trade-offs between swapping filament for more printers vs. starting immediately with what's available.
 
-The agent must swap the nearly-empty spool for a full one from inventory before starting the print. Naively assigning the job causes a mid-print filament runout and failure.
+### Task 3: Chaos Shift (Hard)
+**Budget:** 30 steps | **Jobs:** 4 jobs, mixed materials, 2 urgent with deadlines
 
-**Scoring:** 1.0 for successful completion with proactive filament swap. 0.3 if the job fails mid-print (partial progress credit). Continuous signal while printing.
+Four jobs with competing priorities across printers with varying reliability. One printer starts in `ERROR`. Printer 2 needs maintenance within 5 steps (will degrade if ignored). The unreliable printer 3 (reliability=0.70) will likely fail mid-print. Two urgent jobs have tight deadlines. The agent must triage the broken printer, schedule maintenance proactively, route critical jobs to reliable printers, and manage limited inventory — all under stochastic failure conditions.
 
-### Task 3: Hardware Triage (Hard)
-**Objective:** Complete a 500g ABS print that triggers a hardware error at step 5, requiring the agent to recover.
+## Scoring
 
-The agent must detect the error, re-assign or re-route the job to another printer (possibly after a filament swap), and complete it with minimal total downtime.
-
-**Scoring:** Based on completion and downtime efficiency. Maximum 1.0 for fast recovery, floor of 0.2 if completed with high downtime. Zero if job never completes.
+Scores range from 0.0 to 1.0. The grader uses priority-weighted job completion:
+- **Priority 3** jobs are worth 2x, **priority 2** worth 1x, **priority 1** worth 0.5x
+- Meeting deadlines gives full credit; late completion is penalised (40–60% credit)
+- In-progress jobs earn partial credit proportional to progress
+- Failed jobs with partial progress earn small credit (10–15%)
+- Step penalties for wasted actions and invalid commands
+- Task 3 awards a bonus for meeting all urgent deadlines
 
 ## Setup
 
-1. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
 ## Usage
 
@@ -102,24 +139,22 @@ docker build -t printfarm-env .
 docker run -p 7860:7860 printfarm-env
 ```
 
-The API will be available at `http://localhost:7860` with endpoints:
-- `POST /reset` — Reset the environment
+API endpoints at `http://localhost:7860`:
+- `POST /reset` — Reset environment (pass `episode_id`: `task_1`, `task_2`, `task_3`)
 - `POST /step` — Execute an action
 - `GET /state` — Get current state
 - `GET /health` — Health check
-- `GET /schema` — Action/observation schemas
+- `GET /schema` — Action/observation JSON schemas
 
 ## Baseline Scores
 
-Without an API key (WAIT-only fallback agent):
-- Task 1: 0.0 (no jobs assigned)
-- Task 2: 0.0 (no action taken)
-- Task 3: 0.0 (no action taken)
+Without an API key (WAIT-only fallback):
+- Task 1: 0.000 | Task 2: 0.000 | Task 3: 0.000
 
-Expected scores with a capable LLM agent:
-- Task 1 (Easy): ~0.8–1.0
-- Task 2 (Medium): ~0.7–1.0
-- Task 3 (Hard): ~0.3–0.8
+Expected with a capable LLM agent:
+- Task 1 (Easy): ~0.7–1.0
+- Task 2 (Medium): ~0.5–0.8
+- Task 3 (Hard): ~0.2–0.6
 
 ## Repository Structure
 
@@ -127,4 +162,4 @@ Expected scores with a capable LLM agent:
 - `server/` — FastAPI server wrapping the environment for HTTP access
 - `openenv.yaml` — OpenEnv spec configuration
 - `inference.py` — Baseline agent using OpenAI-compatible API
-- `Dockerfile` — Container definition for Hugging Face Spaces deployment
+- `Dockerfile` — Container for Hugging Face Spaces deployment
