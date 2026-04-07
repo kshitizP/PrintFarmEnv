@@ -68,13 +68,15 @@ def load_task(task_id: str) -> FarmObservation:
         # -----------------------------------------------------------------
         # MEDIUM — "Material Juggle"
         # 3 jobs requiring 2 different materials (PETG + ABS).
-        # Only 1 printer loaded (PETG, low spool). Inventory is limited.
-        # One job is urgent with a deadline. Agent must:
-        #   1. Swap filament on the right printers
-        #   2. Prioritise the urgent job
-        #   3. Manage limited inventory (only 1500g PETG, 1000g ABS)
-        # Probabilistic failures on printer 3 (reliability=0.75).
-        # max_steps=25
+        # Printer 1 has PETG but low spool (must swap for the big job).
+        # Printer 2 has ABS ready to go.
+        # Agent must:
+        #   1. Recognise P1's spool is too small and swap on another printer
+        #   2. Prioritise the urgent job on a reliable printer
+        #   3. Run all 3 jobs in parallel across available printers
+        # Shorter print times and generous budget allow recovery from
+        # one failure, making this genuinely medium difficulty.
+        # max_steps=30
         # -----------------------------------------------------------------
         printers = []
         for i in range(1, 11):
@@ -88,14 +90,14 @@ def load_task(task_id: str) -> FarmObservation:
                 printers.append(PrinterObservation(
                     printer_id=i, state=PrinterState.IDLE,
                     current_material="ABS", spool_weight_g=1000.0,
-                    reliability=0.92, maintenance_due_in=35,
+                    reliability=0.95, maintenance_due_in=40,
                 ))
             elif i == 3:
                 # Unreliable printer, no filament
                 printers.append(PrinterObservation(
                     printer_id=i, state=PrinterState.IDLE,
                     current_material=None, spool_weight_g=0.0,
-                    reliability=0.75, maintenance_due_in=15,
+                    reliability=0.80, maintenance_due_in=15,
                 ))
             else:
                 printers.append(PrinterObservation(
@@ -106,10 +108,10 @@ def load_task(task_id: str) -> FarmObservation:
 
         queue = [
             PrintJob(job_id="job_urgent", material_required="PETG",
-                     weight_required_g=700.0, print_time_steps=14,
-                     priority=3, deadline_steps=20),       # Urgent, tight deadline
+                     weight_required_g=500.0, print_time_steps=8,
+                     priority=3, deadline_steps=18),       # Urgent but achievable
             PrintJob(job_id="job_abs", material_required="ABS",
-                     weight_required_g=400.0, print_time_steps=10,
+                     weight_required_g=400.0, print_time_steps=8,
                      priority=2),
             PrintJob(job_id="job_small", material_required="PETG",
                      weight_required_g=150.0, print_time_steps=5,
@@ -119,7 +121,7 @@ def load_task(task_id: str) -> FarmObservation:
         return FarmObservation(
             active_queue=queue, printers=printers,
             inventory={"PETG": 1500.0, "ABS": 1000.0},
-            time_step=0, max_steps=25,
+            time_step=0, max_steps=30,
         )
 
     elif task_id == "task_3":
@@ -170,22 +172,22 @@ def load_task(task_id: str) -> FarmObservation:
         queue = [
             PrintJob(job_id="job_critical", material_required="ABS",
                      weight_required_g=500.0, print_time_steps=10,
-                     priority=3, deadline_steps=18),       # Critical, tight
+                     priority=3, deadline_steps=20),       # Critical, tight
             PrintJob(job_id="job_petg_rush", material_required="PETG",
                      weight_required_g=300.0, print_time_steps=8,
-                     priority=3, deadline_steps=22),       # Urgent
+                     priority=3, deadline_steps=24),       # Urgent
             PrintJob(job_id="job_bulk", material_required="ABS",
-                     weight_required_g=600.0, print_time_steps=15,
+                     weight_required_g=400.0, print_time_steps=10,
                      priority=1),                          # Low, heavy
             PrintJob(job_id="job_filler", material_required="PETG",
                      weight_required_g=100.0, print_time_steps=4,
-                     priority=2, deadline_steps=28),
+                     priority=2, deadline_steps=30),
         ]
 
         return FarmObservation(
             active_queue=queue, printers=printers,
             inventory={"ABS": 1200.0, "PETG": 1000.0, "PLA": 500.0},
-            time_step=0, max_steps=30,
+            time_step=0, max_steps=35,
         )
 
     else:
@@ -201,24 +203,28 @@ class TaskGrader:
         self.task_id = task_id
         self.wasted_steps = 0
         self.failed_actions = 0
-        self.deadline_misses = 0
+        # Track the step at which each job was completed (for deadline eval)
+        self.completion_step: dict[str, int] = {}
 
     # ------------------------------------------------------------------
     #  Per-step bookkeeping
     # ------------------------------------------------------------------
     def step_update(self, action, action_handled: bool,
                     state: FarmObservation, time_step: int):
-        if action and action.action.value == "WAIT":
+        # Only penalise WAIT when there is actionable work remaining
+        has_actionable = any(
+            j.state in (JobState.PENDING,)
+            for j in state.active_queue
+        )
+        if action and action.action.value == "WAIT" and has_actionable:
             self.wasted_steps += 1
         if action and not action_handled and action.action.value != "WAIT":
             self.failed_actions += 1
 
-        # Check for deadline misses on completed/failed/still-pending jobs
+        # Record the step at which jobs complete (first time only)
         for job in state.active_queue:
-            if job.deadline_steps and time_step >= job.deadline_steps:
-                if job.state not in (JobState.COMPLETED,):
-                    # We'll count this once at the end via get_score
-                    pass
+            if job.state == JobState.COMPLETED and job.job_id not in self.completion_step:
+                self.completion_step[job.job_id] = time_step
 
     # ------------------------------------------------------------------
     #  Score calculation  (0.0 – 1.0)
@@ -234,6 +240,15 @@ class TaskGrader:
             return self._score_task3(state, step_penalty)
         return 0.0
 
+    def _met_deadline(self, job) -> bool:
+        """Check if a completed job met its deadline (using recorded step)."""
+        if not job.deadline_steps:
+            return True  # No deadline = always on time
+        completed_at = self.completion_step.get(job.job_id)
+        if completed_at is None:
+            return False
+        return completed_at <= job.deadline_steps
+
     # --- Task 1: Night Shift Scheduling ----------------------------------
     def _score_task1(self, state: FarmObservation, penalty: float) -> float:
         jobs = state.active_queue
@@ -242,7 +257,6 @@ class TaskGrader:
 
         # Hard fail: any failed or cancelled job
         if any(j.state in (JobState.FAILED, JobState.CANCELLED) for j in jobs):
-            # Still give partial credit for what was completed
             completed = sum(1 for j in jobs if j.state == JobState.COMPLETED)
             return _clamp(completed * 0.1 - penalty)
 
@@ -252,13 +266,10 @@ class TaskGrader:
             w = _priority_weight(job.priority)
             total_weight += w
             if job.state == JobState.COMPLETED:
-                # Deadline bonus/penalty
-                if job.deadline_steps and state.time_step <= job.deadline_steps:
-                    earned += w  # Full credit
-                elif job.deadline_steps:
-                    earned += w * 0.6  # Late
-                else:
+                if self._met_deadline(job):
                     earned += w
+                else:
+                    earned += w * 0.6  # Late
             elif job.state == JobState.PRINTING and job.print_time_steps > 0:
                 earned += w * 0.4 * (job.progress_steps / job.print_time_steps)
 
@@ -278,19 +289,15 @@ class TaskGrader:
             total_weight += w
 
             if job.state == JobState.COMPLETED:
-                if job.deadline_steps and state.time_step <= job.deadline_steps:
+                if self._met_deadline(job):
                     earned += w
-                elif job.deadline_steps:
-                    earned += w * 0.5  # Late completion
                 else:
-                    earned += w
+                    earned += w * 0.5
             elif job.state == JobState.FAILED:
                 if job.progress_steps > 0:
-                    earned += w * 0.15  # Tried but failed
+                    earned += w * 0.15
             elif job.state == JobState.PRINTING and job.print_time_steps > 0:
                 earned += w * 0.5 * (job.progress_steps / job.print_time_steps)
-            elif job.state == JobState.PENDING:
-                pass  # No credit
 
         score = earned / total_weight if total_weight > 0 else 0.0
         return _clamp(score - penalty)
@@ -308,26 +315,20 @@ class TaskGrader:
             total_weight += w
 
             if job.state == JobState.COMPLETED:
-                if job.deadline_steps and state.time_step <= job.deadline_steps:
+                if self._met_deadline(job):
                     earned += w
-                elif job.deadline_steps:
-                    earned += w * 0.4  # Late under chaos is still partial credit
                 else:
-                    earned += w
+                    earned += w * 0.4
             elif job.state == JobState.FAILED:
                 if job.progress_steps > 0:
                     earned += w * 0.1
             elif job.state == JobState.PRINTING and job.print_time_steps > 0:
                 earned += w * 0.4 * (job.progress_steps / job.print_time_steps)
 
-        # Bonus for zero deadline misses on urgent jobs
-        urgent_met = all(
-            state.time_step <= j.deadline_steps
-            for j in jobs
-            if j.priority == 3 and j.deadline_steps and j.state == JobState.COMPLETED
-        )
-        if urgent_met and any(j.priority == 3 and j.state == JobState.COMPLETED for j in jobs):
-            earned += 0.5  # Significant bonus
+        # Bonus for meeting all urgent deadlines
+        urgent_jobs = [j for j in jobs if j.priority == 3 and j.state == JobState.COMPLETED]
+        if urgent_jobs and all(self._met_deadline(j) for j in urgent_jobs):
+            earned += 0.5
 
         score = earned / (total_weight + 0.5) if total_weight > 0 else 0.0
         return _clamp(score - penalty)

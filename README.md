@@ -96,14 +96,14 @@ Each step returns a `FarmObservation`:
 Assign 5 PLA jobs across 10 printers. Three printers are loaded and reliable, two are loaded but unreliable (reliability=0.80), and five are empty. One job is urgent with a tight deadline. The agent must prioritise the urgent job on a reliable printer and manage filament swaps for remaining jobs.
 
 ### Task 2: Material Juggle (Medium)
-**Budget:** 25 steps | **Jobs:** 3 jobs across 2 materials (PETG + ABS)
+**Budget:** 30 steps | **Jobs:** 3 jobs across 2 materials (PETG + ABS)
 
-Three jobs requiring two different materials. Only one printer has PETG loaded (low spool), one has ABS. One printer is unreliable (reliability=0.75). The urgent PETG job has a tight deadline. Limited inventory forces trade-offs between swapping filament for more printers vs. starting immediately with what's available.
+Three jobs requiring two different materials. Printer 1 has PETG but only 200g — not enough for the urgent 500g job, so the agent must swap filament onto another printer first. Printer 2 has ABS ready to go. One printer is unreliable (reliability=0.80). The urgent PETG job has a deadline. The agent must recognise the insufficient spool, swap proactively, and run all jobs in parallel. The 30-step budget allows recovery from one stochastic failure.
 
 ### Task 3: Chaos Shift (Hard)
-**Budget:** 30 steps | **Jobs:** 4 jobs, mixed materials, 2 urgent with deadlines
+**Budget:** 35 steps | **Jobs:** 4 jobs, mixed materials, 2 urgent with deadlines
 
-Four jobs with competing priorities across printers with varying reliability. One printer starts in `ERROR`. Printer 2 needs maintenance within 5 steps (will degrade if ignored). The unreliable printer 3 (reliability=0.70) will likely fail mid-print. Two urgent jobs have tight deadlines. The agent must triage the broken printer, schedule maintenance proactively, route critical jobs to reliable printers, and manage limited inventory — all under stochastic failure conditions.
+Four jobs with competing priorities across printers with varying reliability. One printer starts in `ERROR`. Printer 2 needs maintenance within 5 steps (will degrade if ignored). The unreliable printer 3 (reliability=0.70) will likely fail mid-print. Two urgent jobs have tight deadlines. The agent must triage the broken printer, schedule maintenance proactively, route critical jobs to reliable printers, re-assign after stochastic failures, and manage limited inventory. Even an optimal strategy scores 0.0–0.95 depending on RNG — this is intentional and mirrors real-world uncertainty.
 
 ## Scoring
 
@@ -148,13 +148,18 @@ API endpoints at `http://localhost:7860`:
 
 ## Baseline Scores
 
-Without an API key (WAIT-only fallback):
-- Task 1: 0.000 | Task 2: 0.000 | Task 3: 0.000
+| Model | Task 1 (Easy) | Task 2 (Medium) | Task 3 (Hard) | Total | Time |
+|---|---|---|---|---|---|
+| GPT-4 | 0.990 | 0.850 | **0.920** | **2.760** | 17.6min |
+| GPT-5.2 | 0.990 | 0.820 | **0.800** | **2.610** | 1.1min |
+| GPT-5.4 | 0.980 | **0.940** | 0.567 | **2.487** | 1.1min |
+| GPT-4.1 | 0.990 | 0.840 | 0.557 | 2.387 | 1.6min |
+| GPT-5.1 | 0.990 | 0.900 | 0.473 | 2.363 | 1.2min |
+| GPT-4o | **1.000** | 0.737 | 0.400 | 2.137 | 1.6min |
+| GPT-3.5-turbo | 0.260 | 0.497 | 0.000 | 0.757 | 1.1min |
+| WAIT-only (no API key) | 0.000 | 0.000 | 0.000 | 0.000 | — |
 
-Expected with a capable LLM agent:
-- Task 1 (Easy): ~0.7–1.0
-- Task 2 (Medium): ~0.5–0.8
-- Task 3 (Hard): ~0.2–0.6
+Task 3 scores vary across runs due to stochastic printer failures (seeded RNG). All models complete well under the 20-minute inference limit.
 
 ## Repository Structure
 

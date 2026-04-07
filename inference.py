@@ -60,27 +60,89 @@ Strategy tips:
 Respond with ONLY valid JSON. No explanations."""
 
 
+def _is_reasoning_model(model: str) -> bool:
+    m = model.lower()
+    if m.startswith(("o1", "o3", "o4")):
+        return True
+    if "codex" in m or "-pro" in m:
+        return True
+    if m in ("gpt-5", "gpt-5-mini"):
+        return True
+    return False
+
+
 def extract_action(state_json: str) -> FarmAction:
     if not api_key:
         return FarmAction(action=FarmActionEnum.WAIT)
 
-    try:
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"Current State:\n{state_json}"}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.2,
-            max_tokens=200,
-        )
+    import re
+    reasoning = _is_reasoning_model(model_name)
 
-        content = response.choices[0].message.content
-        action_data = json.loads(content)
+    if reasoning:
+        messages = [
+            {"role": "developer", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"Current State:\n{state_json}"},
+        ]
+        combos = [
+            {"response_format": {"type": "json_object"}, "max_completion_tokens": 400},
+            {"max_completion_tokens": 400},
+        ]
+    else:
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"Current State:\n{state_json}"},
+        ]
+        combos = [
+            {"response_format": {"type": "json_object"}, "max_completion_tokens": 200},
+            {"response_format": {"type": "json_object"}, "max_tokens": 200},
+            {"max_completion_tokens": 200},
+            {"max_tokens": 200},
+        ]
+
+    content = None
+    for kwargs in combos:
+        try:
+            call_kwargs = {"model": model_name, "messages": messages, **kwargs}
+            if not reasoning:
+                call_kwargs["temperature"] = 0.2
+            response = client.chat.completions.create(**call_kwargs)
+            content = response.choices[0].message.content
+            break
+        except Exception:
+            continue
+
+    if content is None:
+        print(f"  [LLM Error] All API call variants failed")
+        return FarmAction(action=FarmActionEnum.WAIT)
+
+    # Parse JSON (handle markdown fences / extra text / thinking tokens)
+    text = content.strip()
+    action_data = None
+    try:
+        action_data = json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+        if match:
+            try:
+                action_data = json.loads(match.group(1))
+            except json.JSONDecodeError:
+                pass
+        if action_data is None:
+            match = re.search(r"\{[^{}]*\}", text)
+            if match:
+                try:
+                    action_data = json.loads(match.group(0))
+                except json.JSONDecodeError:
+                    pass
+
+    if action_data is None:
+        print(f"  [Parse Error] Could not extract JSON")
+        return FarmAction(action=FarmActionEnum.WAIT)
+
+    try:
         return FarmAction(**action_data)
     except Exception as e:
-        print(f"  [LLM Error] {e}")
+        print(f"  [Parse Error] {e}")
         return FarmAction(action=FarmActionEnum.WAIT)
 
 
