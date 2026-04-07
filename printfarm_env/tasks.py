@@ -344,4 +344,10 @@ def _priority_weight(priority: int) -> float:
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, value))
+    """Clamp score to the open interval (0, 1) — strictly between 0.0 and 1.0.
+
+    The OpenEnv validator requires scores to be strictly in (0, 1),
+    i.e. never exactly 0.0 or exactly 1.0.
+    """
+    EPSILON = 0.001
+    return max(EPSILON, min(1.0 - EPSILON, value))
