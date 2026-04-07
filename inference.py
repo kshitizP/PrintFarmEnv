@@ -147,32 +147,28 @@ def extract_action(state_json: str) -> FarmAction:
 
 
 def run_task(task_id: str, env: PrintFarmEnvironment) -> float:
-    print(f"\n{'=' * 50}")
-    print(f"  STARTING {task_id.upper()}")
-    print(f"{'=' * 50}")
+    # Emit structured [START] tag for the validator
+    print(f"[START] task={task_id}", flush=True)
+
     observation = env.reset(episode_id=task_id)
+    step_num = 0
 
     while not observation.done:
-        env.render_dashboard()
         action = extract_action(observation.model_dump_json())
-        print(f"  -> Agent: {action.action.value}", end="")
-        if action.printer_id:
-            print(f" printer={action.printer_id}", end="")
-        if action.job_id:
-            print(f" job={action.job_id}", end="")
-        if action.material:
-            print(f" material={action.material}", end="")
-        print()
 
         observation = env.step(action)
-        if observation.metadata.get("error"):
-            print(f"  -> Error: {observation.metadata['error']}")
+        step_num += 1
 
-        if observation.done:
-            print(f"\n  {task_id.upper()} DONE — Score: {observation.reward:.3f}")
-            env.render_dashboard()
-            return observation.reward
-    return 0.0
+        # Emit structured [STEP] tag for the validator
+        print(f"[STEP] step={step_num} reward={observation.reward:.4f}", flush=True)
+
+        if observation.metadata.get("error"):
+            print(f"  -> Error: {observation.metadata['error']}", flush=True)
+
+    final_score = observation.reward
+    # Emit structured [END] tag for the validator
+    print(f"[END] task={task_id} score={final_score:.4f} steps={step_num}", flush=True)
+    return final_score
 
 
 if __name__ == "__main__":
@@ -183,9 +179,8 @@ if __name__ == "__main__":
     for t in tasks:
         scores[t] = run_task(t, env)
 
-    print(f"\n{'=' * 50}")
-    print("  FINAL SCORES")
-    print(f"{'=' * 50}")
+    # Summary (non-structured, but validator only cares about [START]/[STEP]/[END])
+    print(f"\nFINAL SCORES", flush=True)
     for t, s in scores.items():
-        print(f"  {t}: {s:.3f}")
-    print(f"  Total: {sum(scores.values()):.3f} / {len(tasks)}")
+        print(f"  {t}: {s:.3f}", flush=True)
+    print(f"  Total: {sum(scores.values()):.3f} / {len(tasks)}", flush=True)
