@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11.12-slim-bookworm
 
 # Create a non-root user (good practice for HF Spaces)
 RUN useradd -m -u 1000 user
