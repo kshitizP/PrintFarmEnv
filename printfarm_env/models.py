@@ -29,6 +29,7 @@ class FarmActionEnum(str, Enum):
     SWAP_FILAMENT = "SWAP_FILAMENT"
     CANCEL_JOB = "CANCEL_JOB"
     PERFORM_MAINTENANCE = "PERFORM_MAINTENANCE"
+    RESUME_JOB = "RESUME_JOB"
     WAIT = "WAIT"
 
 
@@ -48,6 +49,7 @@ class FarmAction(_BaseAction):
 class JobState(str, Enum):
     PENDING = "PENDING"
     PRINTING = "PRINTING"
+    PAUSED = "PAUSED"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     CANCELLED = "CANCELLED"
@@ -72,8 +74,10 @@ class PrinterState(str, Enum):
     IDLE = "IDLE"
     WARMING_UP = "WARMING_UP"
     PRINTING = "PRINTING"
+    PAUSED_RUNOUT = "PAUSED_RUNOUT"
     ERROR = "ERROR"
     MAINTENANCE = "MAINTENANCE"
+    OFFLINE = "OFFLINE"
 
 
 class PrinterObservation(BaseModel):
@@ -85,7 +89,8 @@ class PrinterObservation(BaseModel):
     reliability: float = Field(default=0.95, ge=0.0, le=1.0)  # Per-step success rate while printing
     warmup_remaining: int = 0        # Steps left before printing begins
     maintenance_due_in: int = 50     # Steps until maintenance is needed
-    purge_needed: bool = False       # True after filament swap, costs 1 warmup step
+    fatigue_level: int = 0           # 0-10, catastrophic failure at 10
+    offline_remaining: int = 0       # Steps remaining in OFFLINE state
 
 
 # ---------------------------------------------------------------------------

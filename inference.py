@@ -24,38 +24,57 @@ Available actions (respond with exactly ONE as JSON):
 
 1. ASSIGN_JOB — Start a pending job on an idle printer.
    {"action": "ASSIGN_JOB", "printer_id": <int>, "job_id": "<string>"}
-   Requirements: printer must be IDLE, material must match, spool must have
-   enough filament for the job.  There is a 1-step warmup before printing
-   begins (2 steps if purge_needed is true).
+   Requirements: printer must be IDLE, material must match. There is a 1-step
+   warmup before printing begins. If the spool has less filament than the job
+   requires, the print will start but may run out mid-print (PAUSED_RUNOUT).
 
 2. SWAP_FILAMENT — Replace a printer's spool from inventory.
    {"action": "SWAP_FILAMENT", "printer_id": <int>, "material": "<string>"}
-   Printer must be IDLE or ERROR. Gives a fresh 1000g spool. Sets purge_needed.
+   Printer must be IDLE, ERROR, or PAUSED_RUNOUT. Loads a fresh spool (950g
+   after 50g purge cost). IMPORTANT: costs 2 timesteps of warmup (changeover
+   cost). Plan swaps carefully — each one burns time and material.
 
-3. CANCEL_JOB — Cancel a pending or in-progress job.
+3. CANCEL_JOB — Cancel a pending, printing, or paused job.
    {"action": "CANCEL_JOB", "job_id": "<string>"}
 
-4. PERFORM_MAINTENANCE — Service a printer (takes 3 steps, resets reliability).
+4. PERFORM_MAINTENANCE — Service a printer (takes 3 steps).
    {"action": "PERFORM_MAINTENANCE", "printer_id": <int>}
-   Printer must be IDLE or ERROR.
+   Printer must be IDLE or ERROR. Resets fatigue_level to 0, resets
+   maintenance_due_in to 50, adds +5% reliability.
 
-5. WAIT — Do nothing (penalised by the grader).
+5. RESUME_JOB — Resume a paused job after filament swap.
+   {"action": "RESUME_JOB", "printer_id": <int>, "job_id": "<string>"}
+   Printer must be IDLE, job must be PAUSED. Resumes printing from where it
+   left off (no warmup).
+
+6. WAIT — Do nothing (penalised by the grader).
    {"action": "WAIT"}
 
 Key mechanics:
-- Each printer has a reliability score. Lower reliability = higher chance of
-  random failure each printing step. Failed jobs revert to PENDING and can be
-  re-assigned.
-- Maintenance resets the reliability counter and adds +5% reliability.
-- Jobs have priority (1=low, 2=normal, 3=urgent) and optional deadlines.
-  Completing urgent jobs on time is worth much more than low-priority jobs.
-- Printers with maintenance_due_in <= 0 degrade reliability each step.
+- CHANGEOVER COST: Every SWAP_FILAMENT costs 2 timesteps and 50g of material.
+  Batch jobs by material to minimise swaps.
+- CONTINUOUS LATENCY DECAY: For every timestep a job is late past its deadline,
+  its value drops by 5%, bottoming at 10%. Formula:
+  late_credit = weight * max(0.1, 1.0 - 0.05 * steps_late)
+- FILAMENT RUNOUT: If a spool empties mid-print, the printer enters
+  PAUSED_RUNOUT and the job becomes PAUSED. You must SWAP_FILAMENT then
+  RESUME_JOB to continue. Do NOT cancel — you lose all progress.
+- MACHINE FATIGUE: Each printing step increases fatigue_level by 1. If fatigue
+  reaches 10, the printer suffers CATASTROPHIC FAILURE: the job is destroyed,
+  the machine goes OFFLINE for 10 steps. Use PERFORM_MAINTENANCE to reset
+  fatigue before it's too late.
+- RELIABILITY: Lower reliability = higher chance of random failure per step.
+  Maintenance resets the counter and adds +5%.
+- PRIORITY: Jobs have priority 1=low, 2=normal, 3=urgent. Urgent jobs with
+  deadlines are worth the most.
 
 Strategy tips:
+- Check fatigue_level before assigning long jobs. If fatigue + print_time >= 10,
+  run maintenance FIRST.
+- Batch same-material jobs on the same printer to avoid changeover costs.
+- If a spool runs out, swap and resume — never cancel a partially-printed job.
 - Assign urgent/deadline jobs to reliable printers first.
-- Swap filament proactively — don't wait for runout.
-- Perform maintenance on printers with low maintenance_due_in before they fail.
-- Avoid assigning critical jobs to unreliable printers.
+- Every wasted step bleeds points via latency decay. Act decisively.
 
 Respond with ONLY valid JSON. No explanations."""
 

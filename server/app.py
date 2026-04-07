@@ -1,4 +1,5 @@
-from fastapi.responses import HTMLResponse
+from fastapi import Request
+from fastapi.responses import HTMLResponse, JSONResponse
 
 try:
     from openenv.core.env_server.http_server import create_app
@@ -15,6 +16,49 @@ app = create_app(
     env_name="printfarm-env",
     max_concurrent_envs=1,
 )
+
+
+# ---------------------------------------------------------------------------
+#  /env/* compatibility aliases
+#  The OpenEnv hackathon validator expects endpoints under /env/ (e.g.
+#  /env/reset, /env/step) but openenv-core mounts them at root level
+#  (/reset, /step). These aliases forward requests so both paths work.
+# ---------------------------------------------------------------------------
+async def _proxy_to_root(path: str, request: Request) -> JSONResponse:
+    """Forward an /env/<path> request to /<path> internally."""
+    body = await request.body()
+    # Use the ASGI app's own test client to avoid network round-trip
+    from starlette.testclient import TestClient
+    client = TestClient(app, raise_server_exceptions=False)
+    resp = client.post(
+        f"/{path}",
+        content=body,
+        headers={"content-type": "application/json"},
+    )
+    return JSONResponse(content=resp.json(), status_code=resp.status_code)
+
+
+@app.post("/env/reset")
+async def env_reset_alias(request: Request):
+    return await _proxy_to_root("reset", request)
+
+
+@app.post("/env/step")
+async def env_step_alias(request: Request):
+    return await _proxy_to_root("step", request)
+
+
+@app.post("/env/create")
+async def env_create_alias(request: Request):
+    return await _proxy_to_root("create", request)
+
+
+@app.get("/env/state")
+async def env_state_alias(request: Request):
+    from starlette.testclient import TestClient
+    client = TestClient(app, raise_server_exceptions=False)
+    resp = client.get("/state")
+    return JSONResponse(content=resp.json(), status_code=resp.status_code)
 
 
 @app.get("/", response_class=HTMLResponse)
