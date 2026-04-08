@@ -263,9 +263,18 @@ class PrintFarmEnvironment(_BaseEnvironment):
             return False, {"error": f"Printer {p.printer_id} must be IDLE or ERROR"
                                     f" for maintenance (state={p.state.value})."}
 
+        # Thermal cooldown: fatigued printers must rest before maintenance
+        if p.fatigue_level > 0 and p.consecutive_idle_steps < 3:
+            return False, {"error": f"Printer {p.printer_id} is too hot."
+                                    f" It must remain IDLE for 3 consecutive"
+                                    f" steps to cool down before maintenance"
+                                    f" (consecutive_idle_steps="
+                                    f"{p.consecutive_idle_steps})."}
+
         # Maintenance takes 3 time steps (done via MAINTENANCE state)
         p.state = PrinterState.MAINTENANCE
         p.warmup_remaining = 3  # Re-use warmup counter for maintenance duration
+        p.consecutive_idle_steps = 0
         return True, {"error": None}
 
     def _handle_resume(self, action: FarmAction):
@@ -296,6 +305,12 @@ class PrintFarmEnvironment(_BaseEnvironment):
 
     def _tick_physics(self):
         for p in self._state.printers:
+
+            # --- Track consecutive idle steps -------------------------
+            if p.state == PrinterState.IDLE:
+                p.consecutive_idle_steps += 1
+            else:
+                p.consecutive_idle_steps = 0
 
             # --- OFFLINE countdown ------------------------------------
             if p.state == PrinterState.OFFLINE:

@@ -34,6 +34,9 @@ CANCEL_JOB    {"action":"CANCEL_JOB","job_id":"<str>"}
 PERFORM_MAINTENANCE {"action":"PERFORM_MAINTENANCE","printer_id":<int>}
               Printer must be IDLE or ERROR. Takes 3 steps. Resets fatigue_level
               to 0 and restores reliability to 0.95.
+              IMPORTANT: If the printer has fatigue_level > 0, it must have been
+              continuously IDLE for at least 3 steps (thermal cooldown) before
+              maintenance can begin. Check the consecutive_idle_steps field.
 
 RESUME_JOB    {"action":"RESUME_JOB","printer_id":<int>,"job_id":"<str>"}
               Printer must be IDLE. Job must be PAUSED. Resumes printing from

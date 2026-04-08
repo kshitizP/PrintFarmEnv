@@ -8,60 +8,56 @@ def load_task(task_id: str) -> FarmObservation:
 
     if task_id == "task_1":
         # -----------------------------------------------------------------
-        # EASY — "Night Shift" (The Batching Problem)
+        # EASY — "Traffic Jam" Bottleneck
         #
-        # 5 jobs: 3 PLA, 2 PETG (interleaved in the queue to tempt greedy
-        # arrival-order assignment).
-        # Two printers loaded with PLA. The rest are empty.
+        # 5 jobs: 3 PLA (high priority), 2 PETG (one with tight deadline).
+        # Only one printer exists, loaded with PLA.
+        # (The rest of the farm is offline for network upgrades.)
         #
-        # Greedy trap: processing jobs in queue order forces multiple
-        # SWAP_FILAMENT calls (2 steps + 50g each), bleeding time to the
-        # Continuous Latency Decay.
+        # All print times are 1 step, so fatigue maxes at 5 (safe).
+        # The 2-step SWAP_FILAMENT cost is brutally expensive relative
+        # to the 1-step jobs, enforcing a genuine batching paradox.
         #
-        # Winning strategy: read the whole queue, swap ONE empty printer to
-        # PETG, batch all PLA jobs on P1 and all PETG jobs on the swapped
-        # printer.  Only 1 swap total.
+        # Path A (Batch PLA first):
+        #   PLA(1)+PLA(1)+PLA(1)+Swap(2)+PETG(1)+PETG(1) = step 7
+        #   Urgent PETG finishes at step 7 → meets deadline 12.
+        #
+        # Path B (Greedy — urgent PETG first):
+        #   Swap(2)+PETG(1)+Swap(2)+PLA(1)+PLA(1)+PLA(1)+Swap(2)+PETG(1) = 11
+        #   Meets deadline but burns 6 steps on swaps (3 changeovers).
+        #
+        # Optimal: batch all PLA first, then swap once to PETG.
         # -----------------------------------------------------------------
-        printers = []
-        for i in range(1, 11):
-            if i <= 2:
-                # Two PLA-loaded printers ready to go
-                printers.append(PrinterObservation(
-                    printer_id=i, state=PrinterState.IDLE,
-                    current_material="PLA", spool_weight_g=1000.0,
-                    reliability=0.99, maintenance_due_in=50,
-                ))
-            else:
-                # Empty printers — need filament swap to use
-                printers.append(PrinterObservation(
-                    printer_id=i, state=PrinterState.IDLE,
-                    current_material=None, spool_weight_g=0.0,
-                    reliability=0.95, maintenance_due_in=50,
-                ))
+        printers = [
+            PrinterObservation(
+                printer_id=1, state=PrinterState.IDLE,
+                current_material="PLA", spool_weight_g=1000.0,
+                reliability=0.99, maintenance_due_in=50,
+            ),
+        ]
 
-        # Interleaved to tempt greedy assignment: PLA, PETG, PLA, PETG, PLA
         queue = [
             PrintJob(job_id="job_1", material_required="PLA",
-                     weight_required_g=80.0, print_time_steps=4,
-                     priority=2, deadline_steps=16),
+                     weight_required_g=80.0, print_time_steps=1,
+                     priority=3, deadline_steps=16),
             PrintJob(job_id="job_2", material_required="PETG",
-                     weight_required_g=80.0, print_time_steps=4,
+                     weight_required_g=80.0, print_time_steps=1,
                      priority=2, deadline_steps=16),
             PrintJob(job_id="job_3", material_required="PLA",
-                     weight_required_g=80.0, print_time_steps=4,
-                     priority=2, deadline_steps=16),
+                     weight_required_g=80.0, print_time_steps=1,
+                     priority=3, deadline_steps=16),
             PrintJob(job_id="job_4", material_required="PETG",
-                     weight_required_g=80.0, print_time_steps=4,
-                     priority=2, deadline_steps=16),
+                     weight_required_g=80.0, print_time_steps=1,
+                     priority=3, deadline_steps=12),
             PrintJob(job_id="job_5", material_required="PLA",
-                     weight_required_g=80.0, print_time_steps=4,
+                     weight_required_g=80.0, print_time_steps=1,
                      priority=3, deadline_steps=16),
         ]
 
         return FarmObservation(
             active_queue=queue, printers=printers,
             inventory={"PLA": 3000.0, "PETG": 3000.0},
-            time_step=0, max_steps=20,
+            time_step=0, max_steps=25,
         )
 
     elif task_id == "task_2":
@@ -118,26 +114,37 @@ def load_task(task_id: str) -> FarmObservation:
 
     elif task_id == "task_3":
         # -----------------------------------------------------------------
-        # HARD — "Chaos Shift" (The Poison Pill / Machine Fatigue)
+        # HARD — "Thermal Cooldown" Trap
         #
-        # Printer 1 has fatigue_level=4 and an urgent 9-step ABS job.
-        # 4 + 9 = 13 ≥ 10 → catastrophic failure at printing step 6.
+        # Printer 1 has fatigue_level=7 and an urgent 5-step ABS job.
+        # 7 + 5 = 12 ≥ 10 → catastrophic failure.
         #
-        # The agent must run MAINTENANCE first (3 steps, resets fatigue to 0),
-        # then start the job.  0 + 9 = 9 < 10 → safe.
+        # The obvious fix is PERFORM_MAINTENANCE, but there's a catch:
+        # printers with fatigue > 0 must cool down (remain IDLE for 3
+        # consecutive steps) before maintenance can be performed.
         #
-        # Frontier models hate delaying urgent tasks, making this a strong
-        # test of counterfactual reasoning.
+        # The agent must:
+        #   1. WAIT 3 steps for Printer 1 to cool down
+        #   2. PERFORM_MAINTENANCE (3 more steps)
+        #   3. Then ASSIGN_JOB
+        #   Total overhead: 6 steps before printing can start.
+        #
+        # Meanwhile, Printer 2 has PETG and can handle secondary jobs
+        # immediately. The agent should assign side jobs while waiting.
+        #
+        # Trap: Models immediately try PERFORM_MAINTENANCE (rejected),
+        # then thrash with invalid actions, wasting steps. Some may
+        # try to assign the job directly (catastrophic failure).
         # -----------------------------------------------------------------
         printers = []
         for i in range(1, 11):
             if i == 1:
-                # ABS loaded, high fatigue — the poison pill
+                # ABS loaded, high fatigue — must cool down first
                 printers.append(PrinterObservation(
                     printer_id=i, state=PrinterState.IDLE,
                     current_material="ABS", spool_weight_g=1000.0,
                     reliability=0.99, maintenance_due_in=50,
-                    fatigue_level=4,
+                    fatigue_level=7,
                 ))
             elif i == 2:
                 # PETG printer for secondary jobs
@@ -155,20 +162,20 @@ def load_task(task_id: str) -> FarmObservation:
 
         queue = [
             PrintJob(job_id="job_critical", material_required="ABS",
-                     weight_required_g=450.0, print_time_steps=9,
-                     priority=3, deadline_steps=22),
+                     weight_required_g=300.0, print_time_steps=5,
+                     priority=3, deadline_steps=18),
             PrintJob(job_id="job_petg", material_required="PETG",
                      weight_required_g=200.0, print_time_steps=5,
-                     priority=2, deadline_steps=20),
+                     priority=2, deadline_steps=16),
             PrintJob(job_id="job_filler", material_required="ABS",
-                     weight_required_g=200.0, print_time_steps=5,
+                     weight_required_g=200.0, print_time_steps=4,
                      priority=1),
         ]
 
         return FarmObservation(
             active_queue=queue, printers=printers,
             inventory={"ABS": 1500.0, "PETG": 1000.0, "PLA": 500.0},
-            time_step=0, max_steps=35,
+            time_step=0, max_steps=30,
         )
 
     else:
@@ -242,9 +249,11 @@ class TaskGrader:
             return self._score_task3(state, step_penalty)
         return 0.0
 
-    # --- Task 1: Night Shift (Batching Problem) --------------------------
+    # --- Task 1: Traffic Jam (Bottleneck) --------------------------------
     def _score_task1(self, state: FarmObservation, penalty: float) -> float:
-        jobs = state.active_queue
+        # Exclude dummy blocking jobs from scoring
+        jobs = [j for j in state.active_queue
+                if not j.job_id.startswith("dummy_")]
         if not jobs:
             return 0.0
 
@@ -294,7 +303,7 @@ class TaskGrader:
         score = earned / total_weight if total_weight > 0 else 0.0
         return _clamp(score - penalty)
 
-    # --- Task 3: Chaos Shift (Poison Pill / Fatigue) ---------------------
+    # --- Task 3: Thermal Cooldown (Fatigue + Cooldown Gate) --------------
     def _score_task3(self, state: FarmObservation, penalty: float) -> float:
         jobs = state.active_queue
         if not jobs:

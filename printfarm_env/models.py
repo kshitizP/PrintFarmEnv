@@ -91,6 +91,7 @@ class PrinterObservation(BaseModel):
     maintenance_due_in: int = 50     # Steps until maintenance is needed
     fatigue_level: int = 0           # 0-10, catastrophic failure at 10
     offline_remaining: int = 0       # Steps remaining in OFFLINE state
+    consecutive_idle_steps: int = 0  # Steps printer has been continuously IDLE
 
 
 # ---------------------------------------------------------------------------
