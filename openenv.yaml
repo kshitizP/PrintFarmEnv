@@ -1,6 +1,102 @@
 spec_version: 1
 name: printfarm-env
+description: >
+  A 3D print-farm scheduling environment where an LLM agent manages printers,
+  job queues, filament inventory, and maintenance across three progressively
+  harder tasks testing planning, recovery, and counterfactual reasoning.
 type: space
 runtime: fastapi
 app: server.app:app
 port: 7860
+
+# Schema class overrides (resolved from printfarm_env.models)
+action: FarmAction
+observation: FarmObservation
+
+# -------------------------------------------------------------------------
+# Models (informational — defined in printfarm_env/models.py)
+# -------------------------------------------------------------------------
+models:
+  FarmAction:
+    description: A single action the agent can take each step.
+    fields:
+      action:
+        type: FarmActionEnum
+        values: [ASSIGN_JOB, SWAP_FILAMENT, CANCEL_JOB, PERFORM_MAINTENANCE, RESUME_JOB, WAIT]
+      printer_id:
+        type: int | null
+        description: Target printer (required for most actions)
+      job_id:
+        type: str | null
+        description: Target job (required for ASSIGN_JOB, CANCEL_JOB, RESUME_JOB)
+      material:
+        type: str | null
+        description: Filament type for SWAP_FILAMENT
+
+  PrintJob:
+    description: A print job in the queue.
+    fields:
+      job_id: { type: str }
+      material_required: { type: str }
+      weight_required_g: { type: float }
+      print_time_steps: { type: int }
+      priority: { type: int, range: "1-3 (1=low, 2=normal, 3=urgent)" }
+      deadline_steps: { type: int | null, description: "Must complete by this step" }
+      state:
+        type: JobState
+        values: [PENDING, PRINTING, PAUSED, COMPLETED, FAILED, CANCELLED]
+      progress_steps: { type: int, description: "Steps of printing completed so far" }
+
+  PrinterObservation:
+    description: The observable state of a single printer.
+    fields:
+      printer_id: { type: int }
+      state:
+        type: PrinterState
+        values: [IDLE, WARMING_UP, PRINTING, PAUSED_RUNOUT, ERROR, MAINTENANCE, OFFLINE]
+      current_material: { type: str | null }
+      current_job_id: { type: str | null }
+      spool_weight_g: { type: float }
+      reliability: { type: float, range: "0.0-1.0", description: "Per-step success rate while printing" }
+      warmup_remaining: { type: int, description: "Steps left before printing begins" }
+      maintenance_due_in: { type: int, description: "Steps until maintenance is needed" }
+      fatigue_level: { type: int, range: "0-10", description: "Catastrophic failure at 10" }
+      offline_remaining: { type: int, description: "Steps remaining in OFFLINE state" }
+      consecutive_idle_steps: { type: int, description: "Consecutive IDLE steps (3 required before maintenance if fatigued)" }
+
+  FarmObservation:
+    description: Full farm state returned each step.
+    fields:
+      active_queue: { type: "list[PrintJob]" }
+      printers: { type: "list[PrinterObservation]" }
+      inventory: { type: "dict[str, float]", description: "Material name → grams available" }
+      time_step: { type: int }
+      max_steps: { type: int }
+
+# -------------------------------------------------------------------------
+# Tasks (informational — tasks are defined in printfarm_env/tasks.py)
+# -------------------------------------------------------------------------
+tasks:
+  - id: task_1
+    name: Traffic Jam
+    difficulty: easy
+    description: >
+      Single printer, 5 jobs across two materials. The agent must decide
+      whether to batch by material or chase an urgent deadline — each swap
+      costs 2 steps against 1-step prints.
+
+  - id: task_2
+    name: Spool Runout
+    difficulty: medium
+    description: >
+      A large PLA job on a printer with insufficient filament. The spool
+      runs out mid-print (PAUSED_RUNOUT) and the agent must swap filament
+      and resume rather than cancel and lose progress.
+
+  - id: task_3
+    name: Thermal Cooldown
+    difficulty: hard
+    description: >
+      A fatigued printer that will catastrophically fail if used directly.
+      Maintenance requires a 3-step thermal cooldown before it can begin,
+      forcing the agent to wait while keeping secondary printers productive.
