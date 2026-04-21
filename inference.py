@@ -16,53 +16,89 @@ client = OpenAI(
     api_key=api_key if api_key else "dummy_key"
 )
 
-SYSTEM_PROMPT = """You are a Floor Manager for a 3D printing farm. Maximise your score.
+SYSTEM_PROMPT = """You are the Dispatcher AI for a 3D print farm. Your goal is to maximise net profit (dollar P&L) by orchestrating printers, human operators, and sensor data intelligently.
 
-Available actions (respond with exactly ONE JSON object):
+=== ACTION SPACE (respond with exactly ONE JSON object) ===
 
-ASSIGN_JOB    {"action":"ASSIGN_JOB","printer_id":<int>,"job_id":"<str>"}
-              Printer must be IDLE with matching material. Job must be PENDING.
+ASSIGN_JOB
+  {"action":"ASSIGN_JOB","printer_id":<int>,"job_id":"<str>"}
+  Start a PENDING job on an IDLE printer. Material must match. Spool must have
+  enough filament. Printer enters WARMING_UP for 1 step before printing.
 
-SWAP_FILAMENT {"action":"SWAP_FILAMENT","printer_id":<int>,"material":"<str>"}
-              Printer must be IDLE, ERROR, or PAUSED_RUNOUT. Replaces the current
-              spool. New spool loads at 950g (50g is consumed in the purge cycle).
-              The printer enters WARMING_UP for 2 steps before becoming available.
+CANCEL_JOB
+  {"action":"CANCEL_JOB","job_id":"<str>"}
+  Cancel a PENDING, PRINTING, or PAUSED job. Incurs scrap cost + revenue clawback.
 
-CANCEL_JOB    {"action":"CANCEL_JOB","job_id":"<str>"}
-              Cancels a PENDING, PRINTING, or PAUSED job.
+PAUSE_JOB
+  {"action":"PAUSE_JOB","printer_id":<int>}
+  Pause a PRINTING printer (nozzle stays hot). Resume with RESUME_JOB.
 
-PERFORM_MAINTENANCE {"action":"PERFORM_MAINTENANCE","printer_id":<int>}
-              Printer must be IDLE or ERROR. Takes 3 steps. Resets fatigue_level
-              to 0 and restores reliability to 0.95.
-              IMPORTANT: If the printer has fatigue_level > 0, it must have been
-              continuously IDLE for at least 3 steps (thermal cooldown) before
-              maintenance can begin. Check the consecutive_idle_steps field.
+RESUME_JOB
+  {"action":"RESUME_JOB","printer_id":<int>,"job_id":"<str>"}
+  Resume a PAUSED job. If paused due to runout (PAUSED_RUNOUT), spool swap
+  must have completed first.
 
-RESUME_JOB    {"action":"RESUME_JOB","printer_id":<int>,"job_id":"<str>"}
-              Printer must be IDLE. Job must be PAUSED. Resumes printing from
-              where it left off (no warmup required).
+RUN_DIAGNOSTIC
+  {"action":"RUN_DIAGNOSTIC","printer_id":<int>}
+  Costs -$0.50 but reveals ground-truth telemetry (revealed_this_step=true).
+  Earns +$2.00 bonus if a real fault is found. Use when telemetry is suspicious.
+  Do NOT run on clearly healthy printers.
 
-WAIT          {"action":"WAIT"}
+DISPATCH_TICKET
+  {"action":"DISPATCH_TICKET","printer_id":<int>,"operator_id":"<str>",
+   "ticket_type":"<str>","material":"<str or null>"}
+  Send a work order to a named operator. ticket_type options:
+    spool_swap, filament_reload_from_stock,
+    maintenance_basic, maintenance_full_rebuild,
+    diagnostic_physical, unjam_printer
+  Skill: junior=spool_swap/diagnostic_physical, senior=maintenance_basic/unjam_printer,
+         lead=maintenance_full_rebuild
 
-Equipment reference:
-- Each printer tracks a fatigue_level that increments by 1 for every step spent
-  printing. When fatigue_level reaches 10 the printer suffers a catastrophic
-  failure: the current job is marked FAILED and the printer goes OFFLINE for
-  10 steps. PERFORM_MAINTENANCE resets fatigue_level to 0.
-- Printers have a stochastic failure chance each printing step based on their
-  reliability rating. A random failure also marks the job FAILED.
-- Each spool has a weight in grams (spool_weight_g). Printing consumes material
-  each step. If the spool runs out mid-print the printer enters PAUSED_RUNOUT
-  and the job becomes PAUSED. A filament swap is required to continue.
-- maintenance_due_in counts down each printing step. It is informational.
+REQUEST_SPOOL_SWAP
+  {"action":"REQUEST_SPOOL_SWAP","printer_id":<int>,"material":"<str>"}
+  Auto-routes spool_swap to the best available operator.
 
-Scoring:
-- Completed jobs earn points scaled by priority (1=low, 2=medium, 3=urgent).
-- Jobs completed after their deadline lose value progressively — the later the
-  finish, the less the job is worth (down to 10% of base value).
-- Failed and cancelled jobs receive reduced scores.
+REQUEST_MAINTENANCE
+  {"action":"REQUEST_MAINTENANCE","printer_id":<int>,
+   "maintenance_type":"maintenance_basic"}
+  Auto-routes maintenance to best available operator. Printer enters
+  MAINTENANCE_QUEUED until operator arrives.
+
+OVERRIDE_OPERATOR
+  {"action":"OVERRIDE_OPERATOR","ticket_id":"<str>","reason":"<str>"}
+  Cancel a queued (not in-progress) ticket. Costs -$0.10.
+
+WAIT
+  {"action":"WAIT"}
+  Do nothing. Costs -$0.10.
+
+=== ZERO-TRUST SENSOR RULES ===
+
+Telemetry can be corrupted. Never trust a single sensor reading blindly:
+- hotend_temp=0.0   -> thermistor_open. Run RUN_DIAGNOSTIC before acting.
+- hotend_temp>400   -> thermistor_short. Run RUN_DIAGNOSTIC.
+- PAUSED_RUNOUT on a full spool -> filament_sensor_false_runout. Verify spool_weight_g.
+- webcam_hash unchanged for many steps -> webcam_freeze. Run RUN_DIAGNOSTIC.
+- telemetry_ts stale -> klipper_mcu_disconnect.
+- revealed_this_step=true means that printer's telemetry is ground truth this step.
+- Operator REPORT_ANOMALY: trust for mechanical issues (~85%), trust telemetry for electrical.
+
+=== ECONOMIC MODEL ===
+
+- Revenue accrued per printing step (job.price_usd / print_time_steps).
+- SLA: -$50 fixed + -$5/step past deadline (cap: 80% of job price).
+- Catastrophic failure: -$250. Dispatch maintenance before fatigue_level reaches 10.
+- Unnecessary diagnostic: -$0.50. Only run when fault is suspected.
+
+=== OPERATOR STATUS (check `operators` field) ===
+
+- is_on_shift: false = cannot accept tickets.
+- queue_size vs queue_capacity: do not overflow operators.
+- skill_level: junior | senior | lead.
 
 Respond with ONLY valid JSON. No explanations."""
+
+
 
 
 def _is_reasoning_model(model: str) -> bool:
