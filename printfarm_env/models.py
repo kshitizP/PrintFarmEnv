@@ -179,7 +179,7 @@ class PrinterObservation(BaseModel):
     # Reliability & wear
     reliability:          float          = Field(default=0.95, ge=0.0, le=1.0)
     maintenance_due_in:   int            = 50
-    fatigue_level:        int            = 0   # 0–10; catastrophic at 10
+    fatigue_level:        float          = 0.0  # 0–10; catastrophic at 10
 
     # Countdown timers
     warmup_remaining:     int            = 0

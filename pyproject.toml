@@ -7,11 +7,16 @@ name = "printfarm_env"
 version = "1.0.0"
 description = "A hardware DevOps environment for managing a fleet of 3D printers and inventory."
 dependencies = [
-    "openenv-core",
-    "openai",
-    "pydantic",
-    "fastapi",
-    "uvicorn"
+    "openenv-core>=0.1",
+    "openai>=1.0",
+    "pydantic>=2.0,<3",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
 ]
 
 [project.scripts]

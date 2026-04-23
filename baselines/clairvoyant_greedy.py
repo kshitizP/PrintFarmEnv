@@ -64,6 +64,24 @@ def clairvoyant_action(env: PrintFarmEnvironment) -> FarmAction:
     operators = env._operators
     step      = env.time_step
 
+    # -- 0. ERROR recovery — unjam before doing anything else ---------------
+    queued_unjam_printers = {
+        t.target_printer_id
+        for op in operators
+        for t in op.queue + ([op.current_ticket] if op.current_ticket else [])
+        if t.ticket_type == "unjam_printer"
+    }
+    for p in env._printers:
+        if p.state == PrinterState.ERROR and p.printer_id not in queued_unjam_printers:
+            op = _best_operator(operators, "unjam_printer", step)
+            if op:
+                return FarmAction(
+                    action=FarmActionEnum.DISPATCH_TICKET,
+                    printer_id=p.printer_id,
+                    operator_id=op.operator_id,
+                    ticket_type="unjam_printer",
+                )
+
     # -- 1. Catastrophe prevention -----------------------------------------
     for p in env._printers:
         if (p.fatigue_level >= FATIGUE_DANGER

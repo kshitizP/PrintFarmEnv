@@ -413,29 +413,29 @@ class TaskGrader:
     """
 
     # Per-task normalisation baselines.
-    # Calibrated from 5-episode runs (seed=42) on 2026-04-21.
-    # Floor  = naive-greedy mean * 1.5 (generous worst-case).
-    # Ceiling = clairvoyant-greedy mean (prescient upper bound, not true optimal).
+    # Calibrated from 20-episode runs (seed=42) on 2026-04-22 after economics fix.
+    # Floor  ≈ naive-greedy mean − buffer (generous lower bound).
+    # Ceiling ≈ clairvoyant-greedy mean + buffer (prescient upper bound).
     # Update these after each full 200-episode calibration run.
     _NAIVE_FLOOR: Dict[str, float] = {
-        "task_0_1": -50.0,   # naive mean: +32.8
-        "task_0_2": -70.0,   # naive mean: -46.0
-        "task_0_3": -265.0,  # naive mean: -175.5
-        "task_1":   -710.0,  # naive mean: -471.8
-        "task_2":   -250.0,  # naive mean: -166.0
-        "task_3":   -215.0,  # naive mean: -142.0
-        "task_4":   -430.0,  # naive mean: -283.4
-        "task_5":   -830.0,  # naive mean: -553.0
+        "task_0_1":   0.0,   # naive mean: +32.8
+        "task_0_2": -100.0,  # naive mean: -46.0
+        "task_0_3":   70.0,  # naive mean: +111.0
+        "task_1":     50.0,  # naive mean: +123.2
+        "task_2":   -220.0,  # naive mean: -166.0
+        "task_3":   -200.0,  # naive mean: -142.0
+        "task_4":   -360.0,  # naive mean: -283.4
+        "task_5":   -700.0,  # naive mean: -553.0
     }
     _CLAIRVOYANT_CEILING: Dict[str, float] = {
-        "task_0_1":  68.0,    # clairvoyant mean: +68.0
-        "task_0_2": -233.0,   # clairvoyant mean: -232.7
-        "task_0_3": -213.0,   # clairvoyant mean: -213.4
-        "task_1":   -879.0,   # clairvoyant mean: -878.5
-        "task_2":   -669.0,   # clairvoyant mean: -669.0
-        "task_3":   -498.0,   # clairvoyant mean: -498.4
-        "task_4":  -1319.0,   # clairvoyant mean: -1318.5
-        "task_5":  -1932.0,   # clairvoyant mean: -1931.6
+        "task_0_1":  100.0,  # clairvoyant mean: +72.2
+        "task_0_2":   30.0,  # clairvoyant mean: +4.9
+        "task_0_3":  130.0,  # clairvoyant mean: +109.3
+        "task_1":    220.0,  # clairvoyant mean: +175.3
+        "task_2":     60.0,  # clairvoyant mean: +26.6
+        "task_3":     50.0,  # clairvoyant mean: +5.9
+        "task_4":    310.0,  # clairvoyant mean: +269.4
+        "task_5":    530.0,  # clairvoyant mean: +448.2
     }
 
     def __init__(self, task_id: str):

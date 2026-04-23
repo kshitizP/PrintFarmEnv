@@ -69,10 +69,11 @@ class PrinterInternal:
     current_job_id:      Optional[str]   = None
 
     reliability:         float           = 0.95
-    fatigue_level:       int             = 0
+    fatigue_level:       float           = 0.0
     maintenance_due_in:  int             = 50
     warmup_remaining:    int             = 0
     offline_remaining:   int             = 0
+    error_remaining:     int             = 0   # steps until ERROR self-recovery
     consecutive_idle_steps: int          = 0
     maintenance_type:    Optional[str]   = None
     outstanding_ticket_id: Optional[str] = None
@@ -599,7 +600,15 @@ class PrintFarmEnvironment(_BaseEnvironment):
                 if p.offline_remaining <= 0:
                     p.state           = PrinterState.IDLE
                     p.offline_remaining = 0
-                    p.fatigue_level   = 0
+                    p.fatigue_level   = 0.0
+                continue
+
+            # -- ERROR self-recovery (unjam_printer ticket is faster) -------
+            if p.state == PrinterState.ERROR:
+                p.error_remaining -= 1
+                if p.error_remaining <= 0:
+                    p.state         = PrinterState.IDLE
+                    p.error_remaining = 0
                 continue
 
             # -- MAINTENANCE countdown -------------------------------------
@@ -615,7 +624,7 @@ class PrintFarmEnvironment(_BaseEnvironment):
                         p.reliability = min(1.0, p.reliability + 0.05)
                         clear_fault_class(p.active_faults, "maintenance_basic")
                     p.state              = PrinterState.IDLE
-                    p.fatigue_level      = 0
+                    p.fatigue_level      = 0.0
                     p.maintenance_due_in = 50
                     p.bed_drift_counter  = 0.0
                     p.maintenance_type   = None
@@ -661,9 +670,9 @@ class PrintFarmEnvironment(_BaseEnvironment):
                     p.current_job_id = None
                     continue
 
-                # Fatigue accumulation
-                p.fatigue_level += 1
-                if p.fatigue_level >= 10:
+                # Fatigue accumulation (0.1/step → catastrophic after ~100 printing steps)
+                p.fatigue_level += 0.1
+                if p.fatigue_level >= 10.0:
                     # Catastrophic failure → OFFLINE
                     clawback = j.accrued_revenue
                     j.state          = JobState.FAILED
@@ -686,17 +695,27 @@ class PrintFarmEnvironment(_BaseEnvironment):
                     eff_reliability = p.reliability * 0.85
                     p.reliability_penalty_active = False  # only first tick
 
-                if self._rng.random() > eff_reliability:
-                    # Stochastic job failure → ERROR
+                # Per-step failure probability = (1 - reliability) / print_time_steps
+                # reliability_base represents per-job success probability, not per-step.
+                per_step_fail = (1.0 - eff_reliability) / max(j.print_time_steps, 1)
+                if self._rng.random() < per_step_fail:
+                    # Stochastic job failure → ERROR (job back to PENDING for retry)
                     clawback = j.accrued_revenue
+                    scrap    = scrap_cost(j.material_required, j.weight_required_g,
+                                         j.progress_steps, j.print_time_steps)
                     j.state           = JobState.PENDING
                     j.progress_steps  = 0
                     j.accrued_revenue = 0.0
-                    scrap             = scrap_cost(j.material_required, j.weight_required_g,
-                                                   j.progress_steps, j.print_time_steps)
                     p.state           = PrinterState.ERROR
+                    p.error_remaining = 5   # self-recovers in 5 steps if not unjammed
                     p.current_job_id  = None
                     total_delta      -= (scrap + clawback)
+                    self._oversight_log.append({
+                        "step":    self.time_step,
+                        "event":   "STOCHASTIC_FAILURE",
+                        "printer": p.printer_id,
+                        "job":     j.job_id,
+                    })
                     continue
 
                 # Consume filament
