@@ -234,6 +234,55 @@ def collect_rollouts(
     return all_records
 
 
+def collect_mixed_rollouts(
+    policy_fns: List[Callable],
+    policy_names: List[str],
+    policy_weights: List[float],
+    tasks: List[str],
+    n_episodes: int,
+    base_seed: int = DEFAULT_SEED,
+    verbose: bool = False,
+) -> List[Dict[str, Any]]:
+    """Collect rollouts from multiple policies according to weights.
+
+    Each episode is assigned to a single policy (not mixed within an episode).
+    Weights are normalized to sum to 1.0 and determine the fraction of episodes
+    per policy.
+    """
+    import random as _random
+
+    total_w = sum(policy_weights)
+    norm_weights = [w / total_w for w in policy_weights]
+
+    # Assign episode counts per policy
+    episode_counts = [int(n_episodes * w) for w in norm_weights]
+    # Give remainder to the first policy
+    remainder = n_episodes - sum(episode_counts)
+    episode_counts[0] += remainder
+
+    env = PrintFarmEnvironment()
+    all_records: List[Dict[str, Any]] = []
+
+    for task_id in tasks:
+        ep_idx = 0
+        for pfn, pname, count in zip(policy_fns, policy_names, episode_counts):
+            for _ in range(count):
+                seed = base_seed + ep_idx
+                records = run_episode(env, pfn, task_id, seed, ep_idx)
+                all_records.extend(records)
+                er = records[-1]["episode_reward"] if records else 0.0
+
+                if verbose:
+                    print(f"  {task_id}  ep={ep_idx:3d}  policy={pname:<12s}  "
+                          f"steps={len(records):3d}  ep_reward={er:.4f}")
+                ep_idx += 1
+
+        print(f"  {task_id}: {ep_idx} episodes collected "
+              f"({', '.join(f'{n}={c}' for n, c in zip(policy_names, episode_counts))})")
+
+    return all_records
+
+
 # ---------------------------------------------------------------------------
 #  TRL GRPOTrainer reward function (online mode)
 # ---------------------------------------------------------------------------

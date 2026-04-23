@@ -25,3 +25,5 @@ logs/
 htmlcov/
 .coverage
 .hf_home/
+grpo_output_local/
+dagger_output/

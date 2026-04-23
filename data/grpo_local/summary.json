@@ -1,0 +1,9 @@
+{
+  "total_steps": 105,
+  "tasks": [
+    "task_1"
+  ],
+  "episodes": 2,
+  "mean_step_reward": 3.7713237962962967,
+  "mean_ep_reward": 0.7284948179271707
+}

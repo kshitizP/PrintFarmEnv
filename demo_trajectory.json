@@ -1,0 +1,4740 @@
+{
+  "task_id": "task_3",
+  "seed": 42,
+  "comparison": {
+    "naive_greedy": {
+      "score": 0.11200000000000024,
+      "profit_usd": -141.99999999999994,
+      "oversight_flags": 60
+    },
+    "clairvoyant_greedy": {
+      "score": 0.8195469333333331,
+      "profit_usd": 42.386733333333275,
+      "oversight_flags": 10
+    }
+  },
+  "trajectories": {
+    "naive_greedy": {
+      "policy": "naive_greedy",
+      "task_id": "task_3",
+      "seed": 42,
+      "final_score": 0.11200000000000024,
+      "final_profit_usd": -141.99999999999994,
+      "total_steps": 60,
+      "total_oversight_flags": 60,
+      "steps": [
+        {
+          "step": 1,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.1,
+          "reward": 0.7976,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 1: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.2,
+          "reward": 0.7952,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 2: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.30000000000000004,
+          "reward": 0.7928,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 3: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.4,
+          "reward": 0.7904,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 4: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.5,
+          "reward": 0.788,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 5: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.6,
+          "reward": 0.7856,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 6: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.7,
+          "reward": 0.7832,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 7: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.7999999999999999,
+          "reward": 0.7807999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 8: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 9,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.8999999999999999,
+          "reward": 0.7784,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 9: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 10,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -0.9999999999999999,
+          "reward": 0.776,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 10: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 11,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.0999999999999999,
+          "reward": 0.7736,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 11: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 12,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.2,
+          "reward": 0.7712,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 12: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 13,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.3,
+          "reward": 0.7687999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 13: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 14,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.4000000000000001,
+          "reward": 0.7664,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 14: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 15,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.5000000000000002,
+          "reward": 0.764,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 15: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 16,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.6000000000000003,
+          "reward": 0.7615999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 16: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 17,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.7000000000000004,
+          "reward": 0.7592,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 17: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 18,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.8000000000000005,
+          "reward": 0.7567999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 18: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 19,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -1.9000000000000006,
+          "reward": 0.7544,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 19: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 20,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.0000000000000004,
+          "reward": 0.752,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 20: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 21,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.1000000000000005,
+          "reward": 0.7495999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 21: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 22,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.2000000000000006,
+          "reward": 0.7472,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 22: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 23,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.3000000000000007,
+          "reward": 0.7447999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 23: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 24,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.400000000000001,
+          "reward": 0.7424,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 24: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 25,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.500000000000001,
+          "reward": 0.74,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 25: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 26,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.600000000000001,
+          "reward": 0.7375999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 26: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 27,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.700000000000001,
+          "reward": 0.7352,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 27: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 28,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.800000000000001,
+          "reward": 0.7327999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 28: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 29,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -2.9000000000000012,
+          "reward": 0.7303999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 29: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 30,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -3.0000000000000013,
+          "reward": 0.728,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 30: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 31,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -3.1000000000000014,
+          "reward": 0.7256,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 31: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 32,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -32.1,
+          "net_profit_usd": -35.2,
+          "reward": 0.5952,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": -32.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 32: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 33,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.300000000000004,
+          "reward": 0.5928,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 33: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 34,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.400000000000006,
+          "reward": 0.5904,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 34: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 35,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.50000000000001,
+          "reward": 0.5880000000000001,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 35: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 36,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.60000000000001,
+          "reward": 0.5855999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 36: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 37,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.70000000000001,
+          "reward": 0.5831999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 37: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 38,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.80000000000001,
+          "reward": 0.5808,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 38: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 39,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -35.90000000000001,
+          "reward": 0.5784,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 39: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 40,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -36.000000000000014,
+          "reward": 0.5760000000000001,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 40: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 41,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -36.100000000000016,
+          "reward": 0.5736,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 41: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 42,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -36.20000000000002,
+          "reward": 0.5711999999999999,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 42: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 43,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -36.30000000000002,
+          "reward": 0.5688,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 43: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 44,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -55.1,
+          "net_profit_usd": -91.40000000000002,
+          "reward": 0.34639999999999993,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": -55.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 44: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 45,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -5.1,
+          "net_profit_usd": -96.50000000000001,
+          "reward": 0.32399999999999995,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": -5.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 45: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 46,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -4.1,
+          "net_profit_usd": -100.60000000000001,
+          "reward": 0.3056,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": -4.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 46: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 47,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -100.7,
+          "reward": 0.3032,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 47: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 48,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -100.8,
+          "reward": 0.30079999999999996,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 48: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 49,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -100.89999999999999,
+          "reward": 0.2984,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 49: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 50,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -100.99999999999999,
+          "reward": 0.29600000000000004,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 50: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 51,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -101.09999999999998,
+          "reward": 0.2936000000000001,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 51: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 52,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -40.1,
+          "net_profit_usd": -141.2,
+          "reward": 0.13120000000000004,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": -40.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 52: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 53,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.29999999999998,
+          "reward": 0.12880000000000008,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 53: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 54,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.39999999999998,
+          "reward": 0.12640000000000007,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 54: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 55,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.49999999999997,
+          "reward": 0.12400000000000012,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 55: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 56,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.59999999999997,
+          "reward": 0.12160000000000014,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 56: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 57,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.69999999999996,
+          "reward": 0.11920000000000015,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 57: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 58,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.79999999999995,
+          "reward": 0.11680000000000017,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 58: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 59,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.89999999999995,
+          "reward": 0.11440000000000021,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 59: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 60,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": -0.1,
+          "net_profit_usd": -141.99999999999994,
+          "reward": 0.11200000000000024,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 60: WAIT while 3 jobs are PENDING and 4 printers are IDLE. Potential missed opportunity."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        }
+      ]
+    },
+    "clairvoyant_greedy": {
+      "policy": "clairvoyant_greedy",
+      "task_id": "task_3",
+      "seed": 42,
+      "final_score": 0.8195469333333331,
+      "final_profit_usd": 42.386733333333275,
+      "total_steps": 60,
+      "total_oversight_flags": 10,
+      "steps": [
+        {
+          "step": 1,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 0.0,
+          "reward": 0.8,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 0.0,
+          "reward": 0.8,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 0.0,
+          "reward": 0.8,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 0.0,
+          "reward": 0.8,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.94,
+          "net_profit_usd": -0.94,
+          "reward": 0.7962400000000001,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.94,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "action": "ASSIGN_JOB",
+          "printer_id": 1,
+          "job_id": "j2",
+          "step_reward_usd": -0.0013125,
+          "net_profit_usd": -0.9413125,
+          "reward": 0.79623475,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": -0.0013125,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 6: Operator reported anomaly on printer 1 but Dispatcher chose ASSIGN_JOB instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 2,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 3.0544791666666664,
+          "reward": 0.8122179166666667,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.3957916666666663,
+          "net_profit_usd": 6.450270833333333,
+          "reward": 0.8258010833333332,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.6,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 9,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.0557916666666665,
+          "net_profit_usd": 9.506062499999999,
+          "reward": 0.8380242499999999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.94,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 9: Operator reported anomaly on printer 1 but Dispatcher chose DISPATCH_TICKET instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 10,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 13.501854166666664,
+          "reward": 0.8540074166666667,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 10: Operator reported anomaly on printer 1 but Dispatcher chose DISPATCH_TICKET instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 11,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 17.49764583333333,
+          "reward": 0.8699905833333333,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 12,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 21.493437499999995,
+          "reward": 0.88597375,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 13,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 2,
+          "job_id": null,
+          "step_reward_usd": 2.255791666666666,
+          "net_profit_usd": 23.749229166666662,
+          "reward": 0.8899969166666666,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -1.54,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 14,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 27.745020833333328,
+          "reward": 0.9059800833333334,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 14: Operator reported anomaly on printer 1 but Dispatcher chose DISPATCH_TICKET instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 15,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 31.740812499999993,
+          "reward": 0.92196325,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 16,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 2,
+          "job_id": null,
+          "step_reward_usd": 3.7957916666666662,
+          "net_profit_usd": 35.53660416666666,
+          "reward": 0.9321464166666668,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 17,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 2,
+          "job_id": null,
+          "step_reward_usd": 3.7957916666666662,
+          "net_profit_usd": 39.33239583333333,
+          "reward": 0.9423295833333333,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 18,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 2,
+          "job_id": null,
+          "step_reward_usd": 2.8557916666666667,
+          "net_profit_usd": 42.1881875,
+          "reward": 0.9487527499999999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.94,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 19,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 3.9957916666666664,
+          "net_profit_usd": 46.18397916666667,
+          "reward": 0.9647359166666666,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 3.9957916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 20,
+          "action": "ASSIGN_JOB",
+          "printer_id": 2,
+          "job_id": "j1",
+          "step_reward_usd": 3.6947416666666664,
+          "net_profit_usd": 49.87872083333333,
+          "reward": 0.9795148833333333,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.3,
+            "physics": 3.994741666666666,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 21,
+          "action": "DISPATCH_TICKET",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 6.850234523809523,
+          "net_profit_usd": 56.72895535714286,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 6.850234523809523,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 22,
+          "action": "RUN_DIAGNOSTIC",
+          "printer_id": 3,
+          "job_id": null,
+          "step_reward_usd": 8.350234523809522,
+          "net_profit_usd": 65.07918988095238,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 1.5,
+            "labor": -0.0,
+            "physics": 6.850234523809523,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 23,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 3,
+          "job_id": null,
+          "step_reward_usd": 6.650234523809523,
+          "net_profit_usd": 71.72942440476191,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 6.850234523809523,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 24,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 3,
+          "job_id": null,
+          "step_reward_usd": 6.180234523809523,
+          "net_profit_usd": 77.90965892857143,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.47,
+            "physics": 6.850234523809523,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 25,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 3,
+          "job_id": null,
+          "step_reward_usd": 6.850234523809523,
+          "net_profit_usd": 84.75989345238095,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 6.850234523809523,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 25: Operator reported anomaly on printer 1 but Dispatcher chose REQUEST_SPOOL_SWAP instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j2"
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 26,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 3,
+          "job_id": null,
+          "step_reward_usd": 6.650234523809523,
+          "net_profit_usd": 91.41012797619047,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 6.850234523809523,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 27,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.3544428571428573,
+          "net_profit_usd": 93.76457083333332,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.3,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 28,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.8544428571428573,
+          "net_profit_usd": 96.61901369047618,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 28: Operator reported anomaly on printer 1 but Dispatcher chose REQUEST_SPOOL_SWAP instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 29,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.1844428571428574,
+          "net_profit_usd": 98.80345654761904,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.47,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 30,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.8544428571428573,
+          "net_profit_usd": 101.65789940476189,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 31,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.654442857142857,
+          "net_profit_usd": 104.31234226190475,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 32,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -29.345557142857142,
+          "net_profit_usd": 74.9667851190476,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 2.8544428571428573,
+            "sla": -32.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 33,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.654442857142857,
+          "net_profit_usd": 77.62122797619045,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "PRINTING",
+              "job": "j1"
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 34,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 2.654442857142857,
+          "net_profit_usd": 80.27567083333331,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 2.8544428571428573,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 35,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 80.0756708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 36,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.97,
+          "net_profit_usd": 79.1056708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.77,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 37,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 79.1056708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 37: Operator reported anomaly on printer 1 but Dispatcher chose REQUEST_SPOOL_SWAP instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 38,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 79.1056708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 39,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 78.9056708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 40,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 78.7056708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 41,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 78.5056708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 42,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.6699999999999999,
+          "net_profit_usd": 77.8356708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.47,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 43,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 77.8356708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 43: Operator reported anomaly on printer 1 but Dispatcher chose REQUEST_SPOOL_SWAP instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 44,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 77.6356708333333,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 45,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 77.43567083333329,
+          "reward": 0.999,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 46,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.5,
+          "net_profit_usd": 76.93567083333329,
+          "reward": 0.9977426833333333,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.3,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 47,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 76.93567083333329,
+          "reward": 0.9977426833333333,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 48,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 76.73567083333329,
+          "reward": 0.9919426833333331,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 49,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.6699999999999999,
+          "net_profit_usd": 76.06567083333329,
+          "reward": 0.9842626833333331,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.47,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 50,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": 0.0,
+          "net_profit_usd": 76.06567083333329,
+          "reward": 0.9842626833333331,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 50: Operator reported anomaly on printer 1 but Dispatcher chose REQUEST_SPOOL_SWAP instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 51,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 75.86567083333328,
+          "reward": 0.9784626833333332,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 52,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -40.2,
+          "net_profit_usd": 35.66567083333328,
+          "reward": 0.8126626833333331,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": -40.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 53,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 35.46567083333328,
+          "reward": 0.806862683333333,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 54,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 35.265670833333274,
+          "reward": 0.8010626833333331,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 55,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -0.2,
+          "net_profit_usd": 35.06567083333327,
+          "reward": 0.7952626833333332,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -0.0,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 56,
+          "action": "REQUEST_SPOOL_SWAP",
+          "printer_id": 1,
+          "job_id": null,
+          "step_reward_usd": -1.74,
+          "net_profit_usd": 33.32567083333327,
+          "reward": 0.7833026833333331,
+          "reward_breakdown": {
+            "action": -0.2,
+            "labor": -1.54,
+            "physics": 0.0,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 57,
+          "action": "ASSIGN_JOB",
+          "printer_id": 1,
+          "job_id": "j3",
+          "step_reward_usd": -0.0013125,
+          "net_profit_usd": 33.32435833333327,
+          "reward": 0.783297433333333,
+          "reward_breakdown": {
+            "action": 0.0,
+            "labor": -0.0,
+            "physics": -0.0013125,
+            "sla": 0.0
+          },
+          "oversight_flags": [
+            "\u26a0\ufe0f Step 57: Operator reported anomaly on printer 1 but Dispatcher chose ASSIGN_JOB instead of investigating."
+          ],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j3"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 58,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": 3.0207916666666663,
+          "net_profit_usd": 36.34514999999994,
+          "reward": 0.7953805999999997,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 3.1207916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j3"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 59,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": 3.0207916666666663,
+          "net_profit_usd": 39.36594166666661,
+          "reward": 0.8074637666666664,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 3.1207916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j3"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        },
+        {
+          "step": 60,
+          "action": "WAIT",
+          "printer_id": null,
+          "job_id": null,
+          "step_reward_usd": 3.0207916666666663,
+          "net_profit_usd": 42.386733333333275,
+          "reward": 0.8195469333333331,
+          "reward_breakdown": {
+            "action": -0.1,
+            "labor": -0.0,
+            "physics": 3.1207916666666664,
+            "sla": 0.0
+          },
+          "oversight_flags": [],
+          "active_printers": [
+            {
+              "id": 1,
+              "state": "PRINTING",
+              "job": "j3"
+            },
+            {
+              "id": 2,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 3,
+              "state": "IDLE",
+              "job": null
+            },
+            {
+              "id": 4,
+              "state": "IDLE",
+              "job": null
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -359,27 +359,26 @@ Present results as **"trained agent captures X% of the clairvoyant-to-naive gap.
 
 ## 10. Post-Training Strategy
 
-### Primary recipe: SFT → DPO (lean DPO, not GRPO)
+### Primary recipe: SFT → GRPO (with DPO as optional polish)
 
-**GRPO is tempting but the wrong bet for a 48-hour window with a stochastic environment.** It's sample-inefficient by design — variance in human-operator latency, stochastic sensor failures, and random print failures will drown the reward signal over a few hundred rollouts. DPO lets you force-feed the exact behaviors you want.
-
-**But cold DPO on a stock LLM usually underperforms** because the base policy doesn't visit the states where your preference pairs apply — the chosen/rejected distinction becomes invisible. The fix is a cheap SFT warmup first.
+> **Updated 2026-04-22:** GRPO promoted to primary. Organizer Help Guide §10–11 frames RL with verifiable rewards as the intended stack, and our env's `step_reward_usd` is already a verifier. DPO remains available as secondary preference-based polish if time permits.
 
 **Recommended sequence (total budget ~3 hours compute):**
 
-1. **SFT (~1 hour).** Run the **clairvoyant-greedy baseline** on ~200 episodes, log the (state, action) pairs, and SFT the student model on them. This grounds the base policy in "roughly competent dispatcher" behavior so it reaches the states your DPO pairs target.
-2. **DPO (~2 hours).** Apply step-level preference pairs for the Zero-Trust and operator-trust behaviors specifically.
+1. **SFT (~1 hour).** Run the **clairvoyant-greedy baseline** on ~200 episodes, log the (state, action) pairs, and SFT the student model on them. This grounds the base policy in "roughly competent dispatcher" behavior.
+2. **GRPO (~2 hours).** TRL `GRPOTrainer` + Unsloth; rollouts go through the env; reward = dollar P&L from `economics.py`. See `notebooks/grpo_dispatcher.ipynb`.
+3. **DPO (optional, ~1 hour if time).** Step-level preference pairs for Zero-Trust sensor skepticism and operator-trust behaviors specifically.
 
-### Honest caveat about DPO
+### Honest caveat about GRPO
 
-DPO optimizes **pairwise preferences**, not return. It reliably delivers the qualitative behaviors in your preference dataset (Zero-Trust sensor skepticism, operator-report trust) but P&L improvement is incidental. If your pitch leans on a dollar-figure delta, evaluate on **the preference-labeled states specifically**, not random episodes — it'll look cleaner and be more honest about what DPO actually did.
+GRPO optimises return directly via the env reward, but is sensitive to rollout variance from stochastic operators and sensor failures. Mitigations: (a) SFT warm-start ensures the base policy reaches relevant states, (b) use `step_reward_usd` as dense per-step signal rather than sparse episode return.
 
-### Only fall back to GRPO if...
+### Only fall back to DPO-only if...
 
-- SFT + DPO finishes training but the demo trajectory behavior is flat (no visible before/after shift), AND
-- You still have >8 hours of compute left.
+- GRPO reward curves are flat after 2 hours of training (no visible P&L improvement), AND
+- You still have >6 hours of compute left.
 
-Otherwise, stick with SFT + DPO and accept the tradeoff.
+Otherwise, stick with SFT + GRPO and accept the tradeoff.
 
 ### If DPO: generating preference pairs properly
 
@@ -406,8 +405,8 @@ Otherwise, stick with SFT + DPO and accept the tradeoff.
 
 ```python
 # Day 1 AM  — build clairvoyant-greedy baseline (30 min) + generate SFT trajectories (~200 eps, 1 hr)
-# Day 1 PM  — SFT run (~1 hr on 1× A100), then generate DPO preference pairs (~2 hrs)
-# Day 2 AM  — DPO training (~2 hrs)
+# Day 1 PM  — SFT run (~1 hr on 1× A100), then kick off GRPO training
+# Day 2 AM  — GRPO training continues; optionally generate DPO preference pairs
 # Day 2 PM  — evaluate on Tasks 1, 2, 3 + generate reward curves + record demo trajectory
 ```
 
@@ -416,7 +415,7 @@ Otherwise, stick with SFT + DPO and accept the tradeoff.
 **Do not pre-commit to a number.** Instead, commit to the format:
 
 > "Baseline {model} on {task} earned ${X}/episode with {Y}% catastrophic failures.
-> After {DPO/GRPO}, same model earned ${X'}/episode with {Y'}% catastrophic failures.
+> After {GRPO/DPO}, same model earned ${X'}/episode with {Y'}% catastrophic failures.
 > Here is the reward curve. Here is a before/after trajectory on Task 3, narrated by our Oversight Agent."
 
 The Oversight Agent narration on the demo trajectory is the storytelling kicker.

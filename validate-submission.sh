@@ -1,5 +1,18 @@
 #!/bin/bash
+
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -x "$SCRIPT_DIR/venv/bin/python" ]; then
+    PYTHON_BIN="$SCRIPT_DIR/venv/bin/python"
+elif command -v python3 > /dev/null 2>&1; then
+    PYTHON_BIN="$(command -v python3)"
+elif command -v python > /dev/null 2>&1; then
+    PYTHON_BIN="$(command -v python)"
+else
+    echo "❌ Neither python3 nor python is available on PATH."
+    exit 1
+fi
 
 echo "========================================"
 echo "  PrintFarmEnv Pre-Submission Validator "
@@ -11,16 +24,27 @@ if command -v openenv &> /dev/null; then
     echo "✅ OpenEnv schema passed validation!"
 else
     echo "⚠️ 'openenv' CLI tool not found. Trying python validation..."
+
     # A simple python load test to verify syntax/models import correctly
-    python -c "import printfarm_env.models; print('✅ Syntax & Pydantic Checks OK')"
+    "$PYTHON_BIN" -c "import printfarm_env.models; print('✅ Syntax & Pydantic Checks OK')"
 fi
 
 echo ""
 echo "[2/4] Testing Baseline Environment (inference.py)..."
 # Set dummy token so it doesn't try actual openai fetch without keys
 export HF_TOKEN="dummy_token_for_validation"
-# Limit runtime test to just check syntax without stalling
-if python inference.py > /dev/null 2>&1; then
+
+# Fast smoke test: import inference, build env, and run one policy step.
+if "$PYTHON_BIN" - <<'PY' > /dev/null 2>&1
+import inference
+from printfarm_env.env import PrintFarmEnvironment
+
+env = PrintFarmEnvironment()
+obs = env.reset(seed=7, task_id="task_1")
+action = inference.extract_action(obs.model_dump_json())
+env.step(action)
+PY
+then
    echo "✅ Target environment code executes without exceptions!"
 else
    echo "❌ Baseline loop execution failed."
