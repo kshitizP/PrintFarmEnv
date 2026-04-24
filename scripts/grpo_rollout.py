@@ -128,12 +128,18 @@ def _build_model_policy_fn(model_path: str) -> Callable:
     from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
     import torch
 
+    # Use float32 on MPS to avoid logit overflow → NaN in softmax (Gemma issue)
+    if torch.backends.mps.is_available():
+        dtype = torch.float32
+    else:
+        dtype = torch.float16
+
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     pipe = pipeline(
         "text-generation",
         model=model_path,
         tokenizer=tokenizer,
-        torch_dtype=torch.float16,
+        torch_dtype=dtype,
         device_map="auto",
         max_new_tokens=200,
         temperature=0.2,

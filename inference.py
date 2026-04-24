@@ -187,15 +187,233 @@ def extract_action(state_json: str) -> FarmAction:
         return FarmAction(action=FarmActionEnum.WAIT)
 
 
+# ---------------------------------------------------------------------------
+#  Rule-based agent (observation-only, no ground-truth access)
+# ---------------------------------------------------------------------------
+FATIGUE_DANGER = 8
+SKILL_RANK = {"junior": 0, "senior": 1, "lead": 2}
+TICKET_SKILL_REQ = {
+    "spool_swap": "junior", "filament_reload_from_stock": "junior",
+    "maintenance_basic": "senior", "maintenance_full_rebuild": "lead",
+    "diagnostic_physical": "junior", "unjam_printer": "senior",
+}
+
+# Track webcam hashes across steps for freeze detection
+_prev_webcam: dict[int, str] = {}
+_webcam_stale_count: dict[int, int] = {}
+
+
+def _best_operator_obs(operators, ticket_type: str, time_step: int):
+    """Pick best available operator from observation data."""
+    req_rank = SKILL_RANK.get(TICKET_SKILL_REQ.get(ticket_type, "junior"), 0)
+    candidates = [
+        op for op in operators
+        if SKILL_RANK.get(op.skill_level, 0) >= req_rank
+        and op.is_on_shift
+        and op.queue_size < op.queue_capacity
+    ]
+    if not candidates:
+        return None
+    return min(candidates, key=lambda o: (
+        o.queue_size,
+        -SKILL_RANK.get(o.skill_level, 0),
+        o.operator_id,
+    ))
+
+
+def extract_action_rules(obs) -> FarmAction:
+    """
+    Observation-only agent implementing clairvoyant-like priority logic.
+    Uses telemetry heuristics instead of ground-truth fault access.
+    """
+    printers = obs.printers
+    operators = obs.operators
+    jobs = obs.active_queue
+    inventory = obs.inventory
+    time_step = obs.time_step
+
+    # -- 0. ERROR recovery: unjam printers in ERROR state --
+    for p in printers:
+        if p.state == "ERROR" and p.outstanding_ticket_id is None:
+            op = _best_operator_obs(operators, "unjam_printer", time_step)
+            if op:
+                return FarmAction(
+                    action=FarmActionEnum.DISPATCH_TICKET,
+                    printer_id=p.printer_id,
+                    operator_id=op.operator_id,
+                    ticket_type="unjam_printer",
+                )
+
+    # -- 1. Catastrophe prevention: maintenance when fatigue is high --
+    for p in printers:
+        if (p.fatigue_level >= FATIGUE_DANGER
+                and p.state == "IDLE"
+                and p.outstanding_ticket_id is None):
+            op = _best_operator_obs(operators, "maintenance_basic", time_step)
+            if op:
+                return FarmAction(
+                    action=FarmActionEnum.DISPATCH_TICKET,
+                    printer_id=p.printer_id,
+                    operator_id=op.operator_id,
+                    ticket_type="maintenance_basic",
+                )
+
+    # -- 2. Telemetry anomaly detection (observation-only fault inference) --
+    for p in printers:
+        if p.state in ("OFFLINE", "MAINTENANCE", "MAINTENANCE_QUEUED"):
+            continue
+
+        suspicious = False
+        need_physical = False
+
+        # Thermistor open (temp=0) or short (temp>400)
+        if p.hotend_temp == 0.0 or p.hotend_temp > 400:
+            suspicious = True
+            need_physical = True
+
+        # Stale telemetry timestamp (MCU disconnect)
+        if time_step > 0 and p.telemetry_ts < time_step - 2:
+            suspicious = True
+
+        # Webcam freeze detection
+        pid = p.printer_id
+        prev = _prev_webcam.get(pid)
+        if prev is not None and p.webcam_hash == prev and p.state == "PRINTING":
+            _webcam_stale_count[pid] = _webcam_stale_count.get(pid, 0) + 1
+        else:
+            _webcam_stale_count[pid] = 0
+        _prev_webcam[pid] = p.webcam_hash
+
+        if _webcam_stale_count.get(pid, 0) >= 3:
+            suspicious = True
+
+        if suspicious and not p.revealed_this_step:
+            if need_physical and p.outstanding_ticket_id is None:
+                op = _best_operator_obs(operators, "diagnostic_physical", time_step)
+                if op:
+                    return FarmAction(
+                        action=FarmActionEnum.DISPATCH_TICKET,
+                        printer_id=p.printer_id,
+                        operator_id=op.operator_id,
+                        ticket_type="diagnostic_physical",
+                    )
+            else:
+                return FarmAction(
+                    action=FarmActionEnum.RUN_DIAGNOSTIC,
+                    printer_id=p.printer_id,
+                )
+
+    # -- 3. Runout recovery: spool swap for PAUSED_RUNOUT printers --
+    for p in printers:
+        if p.state == "PAUSED_RUNOUT" and p.current_job_id:
+            # Find the job to get required material
+            material = None
+            for j in jobs:
+                if j.job_id == p.current_job_id:
+                    material = j.material_required
+                    break
+            if material is None:
+                material = p.current_material or "PLA"
+            return FarmAction(
+                action=FarmActionEnum.REQUEST_SPOOL_SWAP,
+                printer_id=p.printer_id,
+                material=material,
+            )
+
+    # -- 4. Resume paused jobs --
+    for p in printers:
+        if p.state == "IDLE" and p.current_job_id:
+            # Printer is idle but has a job — it was paused, resume it
+            return FarmAction(
+                action=FarmActionEnum.RESUME_JOB,
+                printer_id=p.printer_id,
+                job_id=p.current_job_id,
+            )
+
+    # -- 5. Job assignment --
+    pending = sorted(
+        [j for j in jobs if j.state == "PENDING"],
+        key=lambda j: (
+            -j.priority,
+            j.deadline_steps if j.deadline_steps else 9999,
+        ),
+    )
+
+    idle_printers = [
+        p for p in printers
+        if p.state == "IDLE"
+        and p.current_job_id is None
+        and p.fatigue_level < FATIGUE_DANGER
+        and p.outstanding_ticket_id is None
+    ]
+
+    assigned_printer_ids = set()
+
+    for job in pending:
+        material = job.material_required
+
+        # (a) Printer with matching material + enough spool
+        candidates = [
+            p for p in idle_printers
+            if p.printer_id not in assigned_printer_ids
+            and p.current_material == material
+            and p.spool_weight_g >= job.weight_required_g
+        ]
+        if candidates:
+            best = max(candidates, key=lambda p: (p.reliability, -p.fatigue_level))
+            assigned_printer_ids.add(best.printer_id)
+            return FarmAction(
+                action=FarmActionEnum.ASSIGN_JOB,
+                printer_id=best.printer_id,
+                job_id=job.job_id,
+            )
+
+        # (b) Seed a printer via spool swap if inventory allows
+        inv_amount = inventory.get(material, 0.0)
+        if inv_amount >= job.weight_required_g:
+            seedable = [
+                p for p in idle_printers
+                if p.printer_id not in assigned_printer_ids
+                and p.current_material != material
+            ]
+            # Don't swap away material if other pending jobs need it
+            filtered = []
+            for p in seedable:
+                cur_mat = p.current_material
+                if cur_mat:
+                    other_pending = any(
+                        j2.state == "PENDING" and j2.material_required == cur_mat
+                        for j2 in jobs
+                    )
+                    if other_pending:
+                        continue
+                filtered.append(p)
+            if filtered:
+                best = max(filtered, key=lambda p: (p.reliability, -p.fatigue_level))
+                assigned_printer_ids.add(best.printer_id)
+                return FarmAction(
+                    action=FarmActionEnum.REQUEST_SPOOL_SWAP,
+                    printer_id=best.printer_id,
+                    material=material,
+                )
+
+    # -- 6. WAIT --
+    return FarmAction(action=FarmActionEnum.WAIT)
+
+
 def run_task(task_id: str, env: PrintFarmEnvironment) -> float:
     # Emit structured [START] tag for the validator
     print(f"[START] task={task_id}", flush=True)
+
+    # Reset webcam tracking for new task
+    _prev_webcam.clear()
+    _webcam_stale_count.clear()
 
     observation = env.reset(episode_id=task_id)
     step_num = 0
 
     while not observation.done:
-        action = extract_action(observation.model_dump_json())
+        action = extract_action_rules(observation)
 
         observation = env.step(action)
         step_num += 1

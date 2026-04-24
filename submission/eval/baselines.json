@@ -1,0 +1,1142 @@
+{
+  "full_random": {
+    "label": "random",
+    "n_episodes": 15,
+    "avg_reward": 0.02756200844671203,
+    "min_reward": 0.001,
+    "max_reward": 0.14741834523809533,
+    "action_distribution": {
+      "CANCEL_JOB": 116,
+      "ASSIGN_JOB": 98,
+      "RUN_DIAGNOSTIC": 119,
+      "RESUME_JOB": 122,
+      "PAUSE_JOB": 92,
+      "OVERRIDE_OPERATOR": 111,
+      "WAIT": 101,
+      "REQUEST_SPOOL_SWAP": 112,
+      "REQUEST_MAINTENANCE": 116,
+      "DISPATCH_TICKET": 93
+    },
+    "episodes": [
+      {
+        "task_id": "task_1",
+        "seed": 42,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 124,
+        "reward": 0.06880968324829934,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 458,
+        "reward": 0.07920291666666682,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 792,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1014,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_1",
+        "seed": 47,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 129,
+        "reward": 0.106999181547619,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 463,
+        "reward": 0.14741834523809533,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 797,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1019,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_1",
+        "seed": 52,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 134,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 468,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 802,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1024,
+        "reward": 0.001,
+        "steps": 90
+      }
+    ]
+  },
+  "full_rules": {
+    "label": "rules",
+    "n_episodes": 15,
+    "avg_reward": 0.037571428571428686,
+    "min_reward": 0.001,
+    "max_reward": 0.11200000000000024,
+    "action_distribution": {
+      "WAIT": 1080
+    },
+    "episodes": [
+      {
+        "task_id": "task_1",
+        "seed": 42,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 124,
+        "reward": 0.07285714285714318,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 458,
+        "reward": 0.11200000000000024,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 792,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1014,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_1",
+        "seed": 47,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 129,
+        "reward": 0.07285714285714318,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 463,
+        "reward": 0.11200000000000024,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 797,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1019,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_1",
+        "seed": 52,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 134,
+        "reward": 0.07285714285714318,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 468,
+        "reward": 0.11200000000000024,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 802,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1024,
+        "reward": 0.001,
+        "steps": 90
+      }
+    ]
+  },
+  "full_wait": {
+    "label": "wait",
+    "n_episodes": 15,
+    "avg_reward": 0.037571428571428686,
+    "min_reward": 0.001,
+    "max_reward": 0.11200000000000024,
+    "action_distribution": {
+      "WAIT": 1080
+    },
+    "episodes": [
+      {
+        "task_id": "task_1",
+        "seed": 42,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 124,
+        "reward": 0.07285714285714318,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 458,
+        "reward": 0.11200000000000024,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 792,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1014,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_1",
+        "seed": 47,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 129,
+        "reward": 0.07285714285714318,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 463,
+        "reward": 0.11200000000000024,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 797,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1019,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_1",
+        "seed": 52,
+        "reward": 0.001,
+        "steps": 60
+      },
+      {
+        "task_id": "task_2",
+        "seed": 134,
+        "reward": 0.07285714285714318,
+        "steps": 60
+      },
+      {
+        "task_id": "task_3",
+        "seed": 468,
+        "reward": 0.11200000000000024,
+        "steps": 60
+      },
+      {
+        "task_id": "task_4",
+        "seed": 802,
+        "reward": 0.001,
+        "steps": 90
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1024,
+        "reward": 0.001,
+        "steps": 90
+      }
+    ]
+  },
+  "dp_random": {
+    "label": "dp_random",
+    "n_episodes": 20,
+    "avg_reward": -0.007727347443964845,
+    "avg_components": {
+      "r_economic": -0.0002273474439648471,
+      "r_format": 0.0,
+      "r_fault_precision": -0.005,
+      "r_message_handling": 0.0,
+      "r_unnecessary_action": -0.0025,
+      "total": -0.007727347443964845
+    },
+    "episodes": [
+      {
+        "task_id": "task_1",
+        "seed": 42,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 124,
+        "reward_total": -0.00033571428571428364,
+        "components": {
+          "r_economic": -0.00033571428571428364,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.00033571428571428364
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 458,
+        "reward_total": -0.15034000000000003,
+        "components": {
+          "r_economic": -0.00034000000000000696,
+          "r_format": 0.0,
+          "r_fault_precision": -0.1,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": -0.05,
+          "total": -0.15034000000000003
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 792,
+        "reward_total": -0.0003149253731343338,
+        "components": {
+          "r_economic": -0.0003149253731343338,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.0003149253731343338
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1014,
+        "reward_total": -0.000308130081300817,
+        "components": {
+          "r_economic": -0.000308130081300817,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.000308130081300817
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 47,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 129,
+        "reward_total": -0.00033571428571428364,
+        "components": {
+          "r_economic": -0.00033571428571428364,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.00033571428571428364
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 463,
+        "reward_total": -0.00034000000000000696,
+        "components": {
+          "r_economic": -0.00034000000000000696,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.00034000000000000696
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 797,
+        "reward_total": -0.0003149253731343338,
+        "components": {
+          "r_economic": -0.0003149253731343338,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.0003149253731343338
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1019,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 52,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 134,
+        "reward_total": -0.00033571428571428364,
+        "components": {
+          "r_economic": -0.00033571428571428364,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.00033571428571428364
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 468,
+        "reward_total": -0.00033999999999999585,
+        "components": {
+          "r_economic": -0.00033999999999999585,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.00033999999999999585
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 802,
+        "reward_total": -0.0003149253731343338,
+        "components": {
+          "r_economic": -0.0003149253731343338,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.0003149253731343338
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1024,
+        "reward_total": -0.000308130081300817,
+        "components": {
+          "r_economic": -0.000308130081300817,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.000308130081300817
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 57,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 139,
+        "reward_total": -0.00033571428571429476,
+        "components": {
+          "r_economic": -0.00033571428571429476,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.00033571428571429476
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 473,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 807,
+        "reward_total": -0.0003149253731343338,
+        "components": {
+          "r_economic": -0.0003149253731343338,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.0003149253731343338
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1029,
+        "reward_total": -0.000308130081300817,
+        "components": {
+          "r_economic": -0.000308130081300817,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": -0.000308130081300817
+        }
+      }
+    ]
+  },
+  "dp_rules": {
+    "label": "dp_rules",
+    "n_episodes": 20,
+    "avg_reward": 0.0,
+    "avg_components": {
+      "r_economic": 0.0,
+      "r_format": 0.0,
+      "r_fault_precision": 0.0,
+      "r_message_handling": 0.0,
+      "r_unnecessary_action": 0.0,
+      "total": 0.0
+    },
+    "episodes": [
+      {
+        "task_id": "task_1",
+        "seed": 42,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 124,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 458,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 792,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1014,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 47,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 129,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 463,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 797,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1019,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 52,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 134,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 468,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 802,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1024,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 57,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 139,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 473,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 807,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1029,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      }
+    ]
+  },
+  "dp_wait": {
+    "label": "dp_wait",
+    "n_episodes": 20,
+    "avg_reward": 0.0,
+    "avg_components": {
+      "r_economic": 0.0,
+      "r_format": 0.0,
+      "r_fault_precision": 0.0,
+      "r_message_handling": 0.0,
+      "r_unnecessary_action": 0.0,
+      "total": 0.0
+    },
+    "episodes": [
+      {
+        "task_id": "task_1",
+        "seed": 42,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 124,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 458,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 792,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1014,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 47,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 129,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 463,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 797,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1019,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 52,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 134,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 468,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 802,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1024,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_1",
+        "seed": 57,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_2",
+        "seed": 139,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_3",
+        "seed": 473,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_4",
+        "seed": 807,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      },
+      {
+        "task_id": "task_5",
+        "seed": 1029,
+        "reward_total": 0.0,
+        "components": {
+          "r_economic": 0.0,
+          "r_format": 0.0,
+          "r_fault_precision": 0.0,
+          "r_message_handling": 0.0,
+          "r_unnecessary_action": 0.0,
+          "total": 0.0
+        }
+      }
+    ]
+  }
+}

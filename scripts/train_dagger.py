@@ -162,7 +162,14 @@ def load_model(model_id, lora_rank):
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    dtype = torch.float16 if DEVICE in ("mps", "cuda") else torch.float32
+    # MPS + Gemma in fp16 causes logit overflow → NaN in softmax.
+    # Use float32 for model weights; fp16 training autocast handles efficiency.
+    if DEVICE == "mps":
+        dtype = torch.float32
+    elif DEVICE == "cuda":
+        dtype = torch.float16
+    else:
+        dtype = torch.float32
     model = AutoModelForCausalLM.from_pretrained(
         model_id, torch_dtype=dtype, trust_remote_code=True,
     )
@@ -207,8 +214,10 @@ def build_dataset(records, tokenizer, data_dir):
 
 def train_round(model, tokenizer, dataset, args, round_dir, grpo_steps):
     """Run one round of GRPO training."""
+    # MPS + Gemma: fp16 autocast causes NaN in generation logits.
+    # Use float32 on MPS (model is already float32). CUDA can use bf16.
     use_bf16 = DEVICE == "cuda"
-    use_fp16 = DEVICE == "mps"
+    use_fp16 = False  # disabled — Gemma logits overflow fp16 on MPS
     gen_batch = max(args.group_size, args.batch_size)
 
     grpo_config = GRPOConfig(
