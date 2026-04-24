@@ -27,3 +27,7 @@ htmlcov/
 .hf_home/
 grpo_output_local/
 dagger_output/
+
+# Large data files
+data/all_tasks/
+grpo_runs/
