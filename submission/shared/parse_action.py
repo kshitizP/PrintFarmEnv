@@ -13,7 +13,7 @@ import json
 import re
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class AgentAction(BaseModel):
@@ -32,7 +32,31 @@ class AgentAction(BaseModel):
     material: Optional[str] = None
     maintenance_type: Optional[str] = None
     reason: Optional[str] = None
-    reasoning: Optional[str] = Field(default=None, exclude=True)  # for inspection, not scored
+    reasoning: Optional[str] = Field(default=None, max_length=200, exclude=True)
+
+    @model_validator(mode="after")
+    def validate_required_fields(self):
+        required = {
+            "ASSIGN_JOB": ["printer_id", "job_id"],
+            "CANCEL_JOB": ["job_id"],
+            "PAUSE_JOB": ["printer_id"],
+            "RESUME_JOB": ["job_id"],
+            "RUN_DIAGNOSTIC": ["printer_id"],
+            "DISPATCH_TICKET": ["operator_id", "ticket_type"],
+            "REQUEST_SPOOL_SWAP": ["printer_id", "material"],
+            "REQUEST_MAINTENANCE": ["printer_id", "maintenance_type"],
+            "OVERRIDE_OPERATOR": ["ticket_id", "reason"],
+            "WAIT": [],
+        }
+        missing = [
+            f for f in required.get(self.action_type, [])
+            if getattr(self, f) is None
+        ]
+        if missing:
+            raise ValueError(
+                f"{self.action_type} requires: {missing}"
+            )
+        return self
 
 
 # Precompiled regex for <action> tag extraction

@@ -4,10 +4,16 @@ Phase 5 Smoke Tests — catch silent failures before wasting an overnight run.
 Tests:
   5.1 Observation consistency (serialization roundtrip)
   5.2 Action parsing robustness
-  5.3 Reward function unit tests
+  5.3 Reward function unit tests (all 6 components + composite NaN check)
   5.4 Rule-based agent regression on new env
   5.5 Random policy reward distribution (non-degenerate)
   5.6 Integration: decision point env end-to-end
+  5.7 AgentAction validation (required fields enforcement)
+  5.8 Fault precision evidence gating
+  5.9 Novel fault reward
+  5.10 Message handling updated weights
+  5.11 RewardBreakdown total sums correctly
+  5.12 Observation dict is source of truth
 """
 
 import json
@@ -24,12 +30,14 @@ from submission.env.models import FarmAction, FarmActionEnum, FarmObservation
 from submission.env.decision_point import DecisionPointEnv, _rules_action
 from submission.shared.serialize import serialize_obs
 from submission.shared.parse_action import parse_action, AgentAction
-from submission.rewards.composite import compute_reward
+from submission.shared.obs_formatter import format_observation_as_text
+from submission.rewards.composite import compute_reward, RewardBreakdown
 from submission.rewards.r_format import r_format
 from submission.rewards.r_economic import r_economic
 from submission.rewards.r_fault_precision import r_fault_precision
 from submission.rewards.r_message_handling import r_message_handling
 from submission.rewards.r_unnecessary_action import r_unnecessary_action
+from submission.rewards.r_novel_fault import r_novel_fault
 
 
 def test_5_1_observation_consistency():
@@ -108,34 +116,51 @@ def test_5_3_reward_function_units():
     """Each reward component returns finite, bounded values."""
     print("Test 5.3: Reward function unit tests...", end=" ")
 
-    # r_format
-    assert r_format(AgentAction(action_type="WAIT")) == 0.0
-    assert r_format(None) == -0.1
-    assert r_format(AgentAction(action_type="ASSIGN_JOB", printer_id=1, job_id="j1")) == 0.0
+    # r_format — needs model_output with <action> tag for positive reward
+    clean_output = '<action>{"action_type": "WAIT"}</action>'
+    assert r_format(AgentAction(action_type="WAIT"), model_output=clean_output) == 0.1
+    assert r_format(None, model_output="some text") <= -0.1  # unparseable
+    # No <action> tag but parsed via fallback → -0.1
+    assert r_format(AgentAction(action_type="WAIT"), model_output="") == -0.1
 
-    # r_economic
+    # r_economic (now scaled by 0.4)
     assert r_economic(1.0, 0.0) > 0  # LLM did better
     assert r_economic(0.0, 1.0) < 0  # LLM did worse
     assert r_economic(0.0, 0.0) == 0.0  # Tied
-    assert -1.0 <= r_economic(100, -100) <= 1.0  # Clamped
+    assert -0.4 <= r_economic(100, -100) <= 0.4  # Clamped at ±0.4
     assert math.isfinite(r_economic(float('inf'), 0))  # NaN guard
 
-    # r_fault_precision
+    # r_fault_precision (evidence-gated)
     tags_with_fault = [{"printer_id": 3, "correct_action": "investigate"}]
     tags_empty = []
+    # With evidence (observation has anomaly flag for P3)
+    obs_with_evidence = {
+        "operator_notes": ["P3 sounds rattly on retract"],
+        "anomaly_flags": [],
+        "printers": [{"printer_id": 3, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 0, "reliability": 0.95}],
+    }
     assert r_fault_precision(
         AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=3),
-        tags_with_fault, []) == 0.2
+        tags_with_fault, [], observation=obs_with_evidence) == 0.4
+    # Without evidence + no anomaly = -0.05
+    obs_no_evidence = {
+        "operator_notes": [],
+        "anomaly_flags": [],
+        "printers": [{"printer_id": 3, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 0, "reliability": 0.95}],
+    }
     assert r_fault_precision(
         AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=3),
-        tags_empty, []) == -0.1
+        tags_empty, [], observation=obs_no_evidence) == -0.05
+    # Non-investigation action
     assert r_fault_precision(
         AgentAction(action_type="WAIT"), tags_with_fault, []) == 0.0
 
-    # r_message_handling
+    # r_message_handling (updated weights)
     msg_rush = [{"ground_truth_action": "accept_rush", "job_id": "j1"}]
     assert r_message_handling(
-        AgentAction(action_type="ASSIGN_JOB", job_id="j1"), msg_rush) == 0.15
+        AgentAction(action_type="ASSIGN_JOB", printer_id=1, job_id="j1"), msg_rush) == 0.4
     assert r_message_handling(
         AgentAction(action_type="WAIT"), msg_rush) < 0
     assert r_message_handling(AgentAction(action_type="WAIT"), []) == 0.0
@@ -149,11 +174,28 @@ def test_5_3_reward_function_units():
         AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=1),
         [{"printer_id": 1}], []) == 0.0
 
-    # Composite: no NaN
+    # r_novel_fault
+    novel_tags = [{"printer_id": 2, "fault_type": "hybrid_thermal_humidity",
+                   "correct_action": "investigate"}]
+    obs_novel = {
+        "operator_notes": [],
+        "anomaly_flags": ["P2: unusual thermal pattern — temps nominal but ambient humidity elevated"],
+        "printers": [{"printer_id": 2, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 1, "reliability": 0.95}],
+    }
+    assert r_novel_fault(
+        AgentAction(action_type="REQUEST_MAINTENANCE", printer_id=2, maintenance_type="general"),
+        novel_tags, observation=obs_novel) == 0.4
+    # Non-preemptive action
+    assert r_novel_fault(
+        AgentAction(action_type="WAIT"), novel_tags) == 0.0
+
+    # Composite: no NaN, includes r_novel_fault
     r = compute_reward(
         AgentAction(action_type="WAIT"), 0.0, 0.0,
         {"operator_notes": [], "customer_messages": [], "anomaly_flags": []})
     assert math.isfinite(r["total"])
+    assert "r_novel_fault" in r
     for k, v in r.items():
         assert math.isfinite(v), f"NaN in {k}"
 
@@ -200,9 +242,7 @@ def test_5_5_random_policy_reward_distribution():
     print("Test 5.5: Random policy reward distribution...", end=" ")
 
     rng = random.Random(42)
-    all_actions = list(FarmActionEnum)
     rewards = []
-    format_failures = 0
 
     for i in range(100):
         task_id = ["task_1", "task_2", "task_3"][i % 3]
@@ -212,29 +252,25 @@ def test_5_5_random_policy_reward_distribution():
         except Exception:
             continue
 
-        # Random action
-        action_type = rng.choice(all_actions)
-        action = FarmAction(action=action_type)
-
-        # Add required fields for some action types
-        if action_type == FarmActionEnum.ASSIGN_JOB:
-            if obs.printers and obs.active_queue:
-                action.printer_id = obs.printers[0].printer_id
-                action.job_id = obs.active_queue[0].job_id
-        elif action_type in (FarmActionEnum.RUN_DIAGNOSTIC, FarmActionEnum.PAUSE_JOB):
-            if obs.printers:
-                action.printer_id = obs.printers[0].printer_id
-        elif action_type == FarmActionEnum.REQUEST_SPOOL_SWAP:
-            if obs.printers:
-                action.printer_id = obs.printers[0].printer_id
-                action.material = "PLA"
+        # Generate a schema-valid random action
+        action = _random_valid_action(obs, rng)
 
         try:
             delta, info = dp_env.step(action)
             gt_tags = dp_env.get_decision_tags()
 
-            parsed = AgentAction(action_type=action_type.value)
-            components = compute_reward(parsed, delta, 0.0, gt_tags)
+            # Build observation dict for evidence gating
+            obs_dict = obs.model_dump() if hasattr(obs, 'model_dump') else None
+
+            parsed = AgentAction(action_type=action.action.value,
+                                 printer_id=action.printer_id,
+                                 job_id=action.job_id,
+                                 operator_id=action.operator_id,
+                                 ticket_type=action.ticket_type,
+                                 material=action.material,
+                                 maintenance_type=action.maintenance_type)
+            components = compute_reward(parsed, delta, 0.0, gt_tags,
+                                        observation=obs_dict)
             rewards.append(components["total"])
         except Exception:
             rewards.append(0.0)
@@ -249,12 +285,51 @@ def test_5_5_random_policy_reward_distribution():
     print(f"mean={mean_r:.3f} var={var_r:.4f} pos={pos} neg={neg}", end=" ")
 
     assert var_r > 0, "Zero variance — no gradient signal"
-    # GRPO normalizes per-group, so it just needs variance.
-    # But if literally ALL rewards are the same sign & magnitude, warn.
     spread = max(rewards) - min(rewards)
     assert spread > 0.01, f"Reward spread too small ({spread:.4f}) — no ranking signal"
 
     print("PASS")
+
+
+def _random_valid_action(obs: FarmObservation, rng: random.Random) -> FarmAction:
+    """Generate a random VALID action consistent with current observation."""
+    action_types = [
+        FarmActionEnum.ASSIGN_JOB, FarmActionEnum.RUN_DIAGNOSTIC,
+        FarmActionEnum.REQUEST_MAINTENANCE, FarmActionEnum.REQUEST_SPOOL_SWAP,
+        FarmActionEnum.WAIT, FarmActionEnum.PAUSE_JOB,
+    ]
+    action_type = rng.choice(action_types)
+
+    printers = obs.printers
+    jobs = obs.active_queue
+
+    if action_type == FarmActionEnum.ASSIGN_JOB:
+        if not printers or not jobs:
+            return FarmAction(action=FarmActionEnum.WAIT)
+        return FarmAction(
+            action=action_type,
+            printer_id=rng.choice(printers).printer_id,
+            job_id=rng.choice(jobs).job_id,
+        )
+    elif action_type in (FarmActionEnum.RUN_DIAGNOSTIC, FarmActionEnum.PAUSE_JOB):
+        if not printers:
+            return FarmAction(action=FarmActionEnum.WAIT)
+        return FarmAction(action=action_type,
+                          printer_id=rng.choice(printers).printer_id)
+    elif action_type == FarmActionEnum.REQUEST_MAINTENANCE:
+        if not printers:
+            return FarmAction(action=FarmActionEnum.WAIT)
+        return FarmAction(action=action_type,
+                          printer_id=rng.choice(printers).printer_id,
+                          maintenance_type="general")
+    elif action_type == FarmActionEnum.REQUEST_SPOOL_SWAP:
+        if not printers:
+            return FarmAction(action=FarmActionEnum.WAIT)
+        return FarmAction(action=action_type,
+                          printer_id=rng.choice(printers).printer_id,
+                          material="PLA")
+    else:
+        return FarmAction(action=FarmActionEnum.WAIT)
 
 
 def test_5_6_decision_point_e2e():
@@ -283,6 +358,213 @@ def test_5_6_decision_point_e2e():
     print("PASS")
 
 
+def test_5_7_action_validation_rejects_incomplete():
+    """AgentAction model_validator rejects actions with missing required fields."""
+    print("Test 5.7: Action validation...", end=" ")
+
+    from pydantic import ValidationError
+
+    # ASSIGN_JOB without job_id should fail
+    try:
+        AgentAction(action_type="ASSIGN_JOB", printer_id=1)
+        assert False, "Should have raised ValidationError"
+    except ValidationError:
+        pass
+
+    # RUN_DIAGNOSTIC without printer_id should fail
+    try:
+        AgentAction(action_type="RUN_DIAGNOSTIC")
+        assert False, "Should have raised ValidationError"
+    except ValidationError:
+        pass
+
+    # REQUEST_MAINTENANCE without maintenance_type should fail
+    try:
+        AgentAction(action_type="REQUEST_MAINTENANCE", printer_id=1)
+        assert False, "Should have raised ValidationError"
+    except ValidationError:
+        pass
+
+    # DISPATCH_TICKET without operator_id/ticket_type should fail
+    try:
+        AgentAction(action_type="DISPATCH_TICKET")
+        assert False, "Should have raised ValidationError"
+    except ValidationError:
+        pass
+
+    # WAIT should pass with no extra fields
+    w = AgentAction(action_type="WAIT")
+    assert w.action_type == "WAIT"
+
+    # Valid ASSIGN_JOB should pass
+    a = AgentAction(action_type="ASSIGN_JOB", printer_id=1, job_id="j1")
+    assert a.action_type == "ASSIGN_JOB"
+
+    print("PASS")
+
+
+def test_5_8_fault_precision_evidence_gating():
+    """Fault precision reward uses evidence gating correctly."""
+    print("Test 5.8: Fault precision evidence gating...", end=" ")
+
+    anomaly_tags = [{"printer_id": 3, "correct_action": "investigate"}]
+
+    # Evidence present + anomaly = +0.4
+    obs_evidence = {
+        "operator_notes": ["P3 sounds rattly on retract"],
+        "anomaly_flags": [],
+        "printers": [{"printer_id": 3, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 0, "reliability": 0.95}],
+    }
+    assert r_fault_precision(
+        AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=3),
+        anomaly_tags, [], observation=obs_evidence) == 0.4
+
+    # No evidence + anomaly = 0.0 (got lucky)
+    obs_no_evidence = {
+        "operator_notes": [],
+        "anomaly_flags": [],
+        "printers": [{"printer_id": 3, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 0, "reliability": 0.95}],
+    }
+    assert r_fault_precision(
+        AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=3),
+        anomaly_tags, [], observation=obs_no_evidence) == 0.0
+
+    # Evidence present + no anomaly = -0.15 (red herring)
+    assert r_fault_precision(
+        AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=3),
+        [], [], observation=obs_evidence) == -0.15
+
+    # No evidence + no anomaly = -0.05 (blind guess)
+    assert r_fault_precision(
+        AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=3),
+        [], [], observation=obs_no_evidence) == -0.05
+
+    print("PASS")
+
+
+def test_5_9_novel_fault_reward():
+    """Novel fault reward fires correctly with evidence."""
+    print("Test 5.9: Novel fault reward...", end=" ")
+
+    novel_tags = [{"printer_id": 2, "fault_type": "hybrid_thermal_humidity",
+                   "correct_action": "investigate"}]
+
+    # With evidence (anomaly flag text mentions P2)
+    obs_with = {
+        "operator_notes": [],
+        "anomaly_flags": ["P2: unusual thermal pattern — temps nominal but ambient humidity elevated"],
+        "printers": [{"printer_id": 2, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 1, "reliability": 0.95}],
+    }
+    assert r_novel_fault(
+        AgentAction(action_type="REQUEST_MAINTENANCE", printer_id=2, maintenance_type="general"),
+        novel_tags, observation=obs_with) == 0.4
+
+    # Without evidence
+    obs_without = {
+        "operator_notes": [],
+        "anomaly_flags": [],
+        "printers": [{"printer_id": 2, "hotend_temp": 200, "fan_rpm": 3000,
+                       "fatigue_level": 0, "reliability": 0.95}],
+    }
+    assert r_novel_fault(
+        AgentAction(action_type="REQUEST_MAINTENANCE", printer_id=2, maintenance_type="general"),
+        novel_tags, observation=obs_without) == 0.0
+
+    # Non-preemptive action
+    assert r_novel_fault(
+        AgentAction(action_type="WAIT"), novel_tags, observation=obs_with) == 0.0
+
+    # No novel fault present
+    assert r_novel_fault(
+        AgentAction(action_type="REQUEST_MAINTENANCE", printer_id=2, maintenance_type="general"),
+        [], observation=obs_with) == 0.0
+
+    print("PASS")
+
+
+def test_5_10_message_handling_updated_weights():
+    """Message handling uses updated reward weights."""
+    print("Test 5.10: Message handling weights...", end=" ")
+
+    msg_rush = [{"ground_truth_action": "accept_rush", "job_id": "j22"}]
+
+    # Exact match: +0.4
+    assert r_message_handling(
+        AgentAction(action_type="ASSIGN_JOB", printer_id=1, job_id="j22"),
+        msg_rush) == 0.4
+
+    # Right action, wrong job: +0.15
+    assert r_message_handling(
+        AgentAction(action_type="ASSIGN_JOB", printer_id=1, job_id="j99"),
+        msg_rush) == 0.15
+
+    # Wrong action: -0.1
+    assert r_message_handling(
+        AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=1),
+        msg_rush) == -0.1
+
+    # No message: 0.0
+    assert r_message_handling(
+        AgentAction(action_type="WAIT"), []) == 0.0
+
+    print("PASS")
+
+
+def test_5_11_reward_breakdown_total():
+    """RewardBreakdown.total sums all components correctly."""
+    print("Test 5.11: RewardBreakdown total...", end=" ")
+
+    bd = RewardBreakdown(
+        format=+0.1,
+        economic=+0.2,
+        fault_precision=+0.4,
+        message_handling=0.0,
+        unnecessary_action=0.0,
+        novel_fault=0.0,
+    )
+    assert abs(bd.total - 0.7) < 1e-6
+
+    # to_dict should have all keys
+    d = bd.to_dict()
+    assert "reward/format" in d
+    assert "reward/economic" in d
+    assert "reward/fault_precision" in d
+    assert "reward/message_handling" in d
+    assert "reward/unnecessary_action" in d
+    assert "reward/novel_fault" in d
+    assert "reward/total" in d
+    assert abs(d["reward/total"] - 0.7) < 1e-6
+
+    print("PASS")
+
+
+def test_5_12_obs_dict_source_of_truth():
+    """Observation dict for reward is the source of truth, not reconstructed from text."""
+    print("Test 5.12: Observation dict source of truth...", end=" ")
+
+    env = PrintFarmEnvironment()
+    state = env.reset(seed=42, task_id="task_1")
+
+    # The observation dict should be obtainable from the state object
+    obs_dict = state.model_dump()
+    obs_text = format_observation_as_text(serialize_obs(state))
+
+    # The obs_dict must contain the core fields
+    assert "printers" in obs_dict
+    assert "operator_notes" in obs_dict
+    assert "customer_messages" in obs_dict
+    assert "anomaly_flags" in obs_dict
+
+    # Verify the dict is a faithful representation
+    assert len(obs_dict["printers"]) == len(state.printers)
+    assert obs_dict["operator_notes"] == list(state.operator_notes)
+
+    print("PASS")
+
+
 def run_all_tests():
     """Run all Phase 5 smoke tests."""
     print("=" * 60)
@@ -300,6 +582,12 @@ def run_all_tests():
         test_5_4_rule_agent_regression,
         test_5_5_random_policy_reward_distribution,
         test_5_6_decision_point_e2e,
+        test_5_7_action_validation_rejects_incomplete,
+        test_5_8_fault_precision_evidence_gating,
+        test_5_9_novel_fault_reward,
+        test_5_10_message_handling_updated_weights,
+        test_5_11_reward_breakdown_total,
+        test_5_12_obs_dict_source_of_truth,
     ]
 
     for test_fn in tests:

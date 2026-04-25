@@ -160,11 +160,22 @@ def evaluate_completion(
     rules_action = _rules_action(obs)
     rules_delta, _ = dp_env_rules.step(rules_action)
 
-    # Compute composite reward (with anti-echo detection)
+    # Compute composite reward (with anti-echo detection + evidence gating)
     obs_text = prompt_info.get("observation_text", "")
+
+    # Build structured observation dict for evidence-gated rewards
+    decision_obs = prompt_info.get("decision_obs")
+    obs_dict = None
+    if decision_obs is not None:
+        if hasattr(decision_obs, "model_dump"):
+            obs_dict = decision_obs.model_dump()
+        elif isinstance(decision_obs, dict):
+            obs_dict = decision_obs
+
     return compute_reward(
         parsed, llm_delta, rules_delta, gt_tags,
         model_output=completion, observation_text=obs_text,
+        observation=obs_dict,
     )
 
 

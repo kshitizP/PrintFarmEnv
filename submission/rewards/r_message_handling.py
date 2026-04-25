@@ -2,8 +2,9 @@
 r_message_handling — reward for correctly handling customer messages.
 
 If a customer message was present and the action addressed it correctly:
-  +0.15 if action matches ground-truth correct action
-  -0.05 if message was present but action is irrelevant/wrong
+  +0.4  if action matches ground-truth correct action AND correct target
+  +0.15 if right action type but wrong job target
+  -0.1  if message was present but action is irrelevant/wrong
    0.0  if no message was present
 
 Requires correct action class AND correct target job_id.
@@ -33,13 +34,13 @@ def r_message_handling(
         message_tags: ground-truth tags for customer_messages this step.
 
     Returns:
-        +0.15 for correct handling, -0.05 for wrong handling, 0.0 if no message.
+        +0.4 for exact match, +0.15 right action wrong job, -0.1 wrong, 0.0 if no message.
     """
     if not message_tags:
         return 0.0
 
     if action is None:
-        return -0.05  # Had a message but couldn't even parse the action
+        return -0.1  # Had a message but couldn't even parse the action
 
     total_reward = 0.0
 
@@ -50,12 +51,16 @@ def r_message_handling(
         if action.action_type in acceptable:
             # Check job_id match for targeted actions
             tag_job = tag.get("job_id")
-            if tag_job and action.job_id and action.job_id != tag_job:
-                # Right action type but wrong job — partial credit
-                total_reward += 0.05
+            if action.action_type in ("ASSIGN_JOB", "CANCEL_JOB", "RESUME_JOB"):
+                if tag_job and action.job_id and action.job_id != tag_job:
+                    # Right action type but wrong job — partial credit
+                    total_reward += 0.15
+                else:
+                    total_reward += 0.4
             else:
-                total_reward += 0.15
+                # WAIT / REQUEST_SPOOL_SWAP — correct action type is enough
+                total_reward += 0.4
         else:
-            total_reward -= 0.05
+            total_reward -= 0.1
 
     return total_reward

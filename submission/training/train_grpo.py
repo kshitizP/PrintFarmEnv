@@ -40,7 +40,7 @@ def parse_args():
                    help="Completions per prompt for GRPO")
     p.add_argument("--learning_rate", type=float, default=5e-6)
     p.add_argument("--lora_rank", type=int, default=16)
-    p.add_argument("--max_completion_length", type=int, default=256)
+    p.add_argument("--max_completion_length", type=int, default=128)
     p.add_argument("--max_seq_length", type=int, default=2048)
     p.add_argument("--output", default="./grpo_runs/latest",
                    help="Output directory for checkpoints")
@@ -221,6 +221,23 @@ def main():
 
             components = evaluate_completion(text, info)
             rewards.append(components["total"])
+
+            # Log per-component rewards to W&B if available
+            if not args.no_wandb:
+                try:
+                    import wandb
+                    if wandb.run is not None:
+                        wandb.log({
+                            "reward/format": components.get("r_format", 0.0),
+                            "reward/economic": components.get("r_economic", 0.0),
+                            "reward/fault_precision": components.get("r_fault_precision", 0.0),
+                            "reward/message_handling": components.get("r_message_handling", 0.0),
+                            "reward/unnecessary_action": components.get("r_unnecessary_action", 0.0),
+                            "reward/novel_fault": components.get("r_novel_fault", 0.0),
+                            "reward/total": components["total"],
+                        })
+                except Exception:
+                    pass  # W&B logging is best-effort
 
         return rewards
 
