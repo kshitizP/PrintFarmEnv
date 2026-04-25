@@ -15,6 +15,12 @@ Decision points:
   - a spool is <15% of job weight remaining
   - a printer has fatigue >= 7 (approaching catastrophic)
   - a printer is in ERROR state with no ticket
+
+target_signal controls which signal type triggers the decision point in reset().
+Use "notes", "messages", "anomalies", "structured", or "any" (default).
+Round-robining across signal types in generate_decision_prompts() ensures
+balanced training coverage so customer_messages and anomaly_flags are not
+crowded out by the higher-frequency operator_notes (40% vs 20% vs 15%/step).
 """
 
 from typing import Any, Dict, List, Optional, Tuple
@@ -27,30 +33,45 @@ from submission.shared.serialize import serialize_obs
 # Number of steps to run after the LLM decision to measure outcome
 K_HORIZON = 10
 
+# Signal types for round-robin sampling
+SIGNAL_TYPES = ["notes", "messages", "anomalies", "structured"]
 
-def _is_decision_point(obs: FarmObservation) -> bool:
-    """Check if the current observation warrants a decision point."""
-    # Unstructured signals
-    if obs.operator_notes:
-        return True
-    if obs.customer_messages:
-        return True
-    if obs.anomaly_flags:
-        return True
 
-    # Structured signals that benefit from LLM reasoning
+def _has_structured_trigger(obs: FarmObservation) -> bool:
+    """True if any structured (non-unstructured) decision trigger is present."""
     for p in obs.printers:
-        # Spool running low on a printing printer
-        if str(p.state) in ("PRINTING",) and p.spool_weight_g < 50:
+        if p.state.value in ("PRINTING",) and p.spool_weight_g < 50:
             return True
-        # High fatigue approaching catastrophe
-        if p.fatigue_level >= 7 and str(p.state) not in ("OFFLINE", "MAINTENANCE", "MAINTENANCE_QUEUED"):
+        if p.fatigue_level >= 7 and p.state.value not in ("OFFLINE", "MAINTENANCE", "MAINTENANCE_QUEUED"):
             return True
-        # ERROR with no ticket
-        if str(p.state) == "ERROR" and p.outstanding_ticket_id is None:
+        if p.state.value == "ERROR" and p.outstanding_ticket_id is None:
             return True
-
     return False
+
+
+def signal_present(obs: FarmObservation, target_signal: str) -> bool:
+    """Return True if the target signal type is present in obs."""
+    if target_signal == "notes":
+        return bool(obs.operator_notes)
+    if target_signal == "messages":
+        return bool(obs.customer_messages)
+    if target_signal == "anomalies":
+        return bool(obs.anomaly_flags)
+    if target_signal == "structured":
+        return _has_structured_trigger(obs)
+    # "any"
+    return (bool(obs.operator_notes) or bool(obs.customer_messages)
+            or bool(obs.anomaly_flags) or _has_structured_trigger(obs))
+
+
+def _is_decision_point(obs: FarmObservation, target_signal: str = "any") -> bool:
+    """Check if the current observation warrants a decision point.
+
+    When target_signal is set (not "any"), only returns True if that specific
+    signal type is present — preventing high-frequency notes from crowding out
+    lower-frequency messages and anomalies.
+    """
+    return signal_present(obs, target_signal)
 
 
 def _rules_action(obs: FarmObservation) -> FarmAction:
@@ -77,7 +98,7 @@ def _rules_action(obs: FarmObservation) -> FarmAction:
 
     # ERROR recovery
     for p in printers:
-        if str(p.state) == "ERROR" and p.outstanding_ticket_id is None:
+        if p.state.value == "ERROR" and p.outstanding_ticket_id is None:
             op = _best_op("unjam_printer")
             if op:
                 return FarmAction(action=FarmActionEnum.DISPATCH_TICKET,
@@ -86,7 +107,7 @@ def _rules_action(obs: FarmObservation) -> FarmAction:
 
     # Catastrophe prevention
     for p in printers:
-        if p.fatigue_level >= 8 and str(p.state) == "IDLE" and p.outstanding_ticket_id is None:
+        if p.fatigue_level >= 8 and p.state.value == "IDLE" and p.outstanding_ticket_id is None:
             op = _best_op("maintenance_basic")
             if op:
                 return FarmAction(action=FarmActionEnum.DISPATCH_TICKET,
@@ -95,7 +116,7 @@ def _rules_action(obs: FarmObservation) -> FarmAction:
 
     # Runout recovery
     for p in printers:
-        if str(p.state) == "PAUSED_RUNOUT" and p.current_job_id:
+        if p.state.value == "PAUSED_RUNOUT" and p.current_job_id:
             mat = p.current_material or "PLA"
             for j in jobs:
                 if j.job_id == p.current_job_id:
@@ -106,15 +127,15 @@ def _rules_action(obs: FarmObservation) -> FarmAction:
 
     # Resume paused
     for p in printers:
-        if str(p.state) == "IDLE" and p.current_job_id:
+        if p.state.value == "IDLE" and p.current_job_id:
             return FarmAction(action=FarmActionEnum.RESUME_JOB,
                               printer_id=p.printer_id, job_id=p.current_job_id)
 
     # Job assignment
-    pending = sorted([j for j in jobs if str(j.state) == "PENDING"],
+    pending = sorted([j for j in jobs if j.state.value == "PENDING"],
                      key=lambda j: (-j.priority, j.deadline_steps or 9999))
     idle = [p for p in printers
-            if str(p.state) == "IDLE" and p.current_job_id is None
+            if p.state.value == "IDLE" and p.current_job_id is None
             and p.fatigue_level < 8 and p.outstanding_ticket_id is None]
 
     for job in pending:
@@ -148,19 +169,29 @@ class DecisionPointEnv:
         self,
         seed: int = 42,
         task_id: str = "task_1",
-        max_steps_to_decision: int = 60,
+        max_steps_to_decision: int = 90,
+        target_signal: str = "any",
     ) -> Tuple[str, FarmObservation]:
-        """Reset and advance to the first decision point.
+        """Reset and advance to the first decision point matching target_signal.
+
+        Args:
+            target_signal: "notes", "messages", "anomalies", "structured", or
+                "any". Gates which signal type triggers the decision point exit.
+                Bumped max_steps from 60 to 90 to give rarer signals (messages
+                at 20%/step, anomalies at 15%/step) enough steps to appear.
 
         Returns:
             (serialized_obs, raw_obs) at the decision point.
-            If no decision point is reached, returns the final obs.
+            If no matching decision point is reached, returns the final obs.
+            Callers should check signal_present(obs, target_signal) to confirm
+            the target was found before using the prompt for training.
         """
+        self._target_signal = target_signal
         obs = self.inner_env.reset(seed=seed, task_id=task_id)
 
         steps = 0
         while not obs.done and steps < max_steps_to_decision:
-            if _is_decision_point(obs):
+            if _is_decision_point(obs, target_signal):
                 self._decision_obs = obs
                 self._decision_reward = obs.reward
                 self._decision_tags = self.inner_env.get_ground_truth_tags()
@@ -170,7 +201,7 @@ class DecisionPointEnv:
             obs = self.inner_env.step(action)
             steps += 1
 
-        # No decision point found — return current state anyway
+        # No matching decision point found — return final obs; caller skips this
         self._decision_obs = obs
         self._decision_reward = obs.reward
         self._decision_tags = self.inner_env.get_ground_truth_tags()

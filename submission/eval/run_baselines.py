@@ -15,11 +15,17 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_here = Path(__file__).resolve().parent
+for _candidate in [_here.parent, _here.parent.parent]:
+    if (_candidate / "submission" / "__init__.py").exists():
+        sys.path.insert(0, str(_candidate))
+        break
 
 from submission.env.env import PrintFarmEnvironment
 from submission.env.models import FarmAction, FarmActionEnum, FarmObservation
-from submission.env.decision_point import DecisionPointEnv, _rules_action
+from submission.env.decision_point import (
+    DecisionPointEnv, _rules_action, SIGNAL_TYPES, signal_present,
+)
 from submission.shared.serialize import serialize_obs
 from submission.shared.parse_action import AgentAction
 from submission.rewards.composite import compute_reward
@@ -77,41 +83,63 @@ def evaluate_policy(policy_fn, label, n_episodes=25):
 def evaluate_decision_point_policy(policy_fn, label, n_episodes=25, k=10):
     """Evaluate a policy on decision points only (for LLM comparison).
 
-    policy_fn(obs, gt_tags) -> AgentAction or None
+    Uses round-robin signal targeting so all signal types (notes, messages,
+    anomalies, structured) get equal coverage — matching how training prompts
+    are generated.
+
+    policy_fn(obs, gt_tags, rng) -> AgentAction or None
     """
+    from submission.shared.parse_action import action_to_farm_action
     rng = random.Random(42)
     results = []
     total_components = defaultdict(float)
     count = 0
+    skipped = 0
 
     for ep in range(n_episodes):
+        target_signal = SIGNAL_TYPES[ep % len(SIGNAL_TYPES)]
         task_id = TASKS[ep % len(TASKS)]
         seed = SEEDS[ep % len(SEEDS)] + ep
 
         dp_env = DecisionPointEnv(k_horizon=k)
         try:
-            serialized, obs = dp_env.reset(seed=seed, task_id=task_id)
+            serialized, obs = dp_env.reset(
+                seed=seed, task_id=task_id, target_signal=target_signal,
+            )
         except Exception:
             continue
 
+        # Skip if target signal not found (same gate as training prompts)
+        if not signal_present(obs, target_signal):
+            skipped += 1
+            continue
+
         gt_tags = dp_env.get_decision_tags()
-        parsed = policy_fn(obs, gt_tags, rng)
+        try:
+            parsed = policy_fn(obs, gt_tags, rng)
+        except Exception:
+            parsed = None
 
         if parsed is not None:
-            from submission.shared.parse_action import action_to_farm_action
             farm_action = action_to_farm_action(parsed)
         else:
             farm_action = FarmAction(action=FarmActionEnum.WAIT)
 
         llm_delta, _ = dp_env.step(farm_action)
 
-        # Rules counterfactual
+        # Rules counterfactual — same seed and target_signal for fair comparison
         dp_env2 = DecisionPointEnv(k_horizon=k)
-        _, obs2 = dp_env2.reset(seed=seed, task_id=task_id)
+        _, obs2 = dp_env2.reset(
+            seed=seed, task_id=task_id, target_signal=target_signal,
+        )
         rules_action = _rules_action(obs2)
         rules_delta, _ = dp_env2.step(rules_action)
 
-        components = compute_reward(parsed, llm_delta, rules_delta, gt_tags)
+        # Pass obs_dict so evidence-gated rewards (fault_precision, novel_fault) work
+        obs_dict = obs.model_dump() if hasattr(obs, "model_dump") else None
+        components = compute_reward(
+            parsed, llm_delta, rules_delta, gt_tags, observation=obs_dict,
+        )
         for k_name, v in components.items():
             total_components[k_name] += v
         count += 1
@@ -119,9 +147,14 @@ def evaluate_decision_point_policy(policy_fn, label, n_episodes=25, k=10):
         results.append({
             "task_id": task_id,
             "seed": seed,
+            "target_signal": target_signal,
             "reward_total": components["total"],
             "components": components,
         })
+
+    if skipped:
+        print(f"  [{label}] Skipped {skipped}/{n_episodes} episodes "
+              f"(target signal not found)")
 
     if count > 0:
         avg_components = {k: v / count for k, v in total_components.items()}
@@ -168,10 +201,38 @@ def wait_policy(obs, rng):
 
 # Decision point policies (get ground truth)
 def dp_random_policy(obs, gt_tags, rng):
-    """Random for decision point evaluation."""
-    return AgentAction(
-        action_type=rng.choice([e.value for e in FarmActionEnum])
-    )
+    """Random but valid AgentAction — samples across all action types."""
+    printers = obs.printers
+    jobs = [j for j in obs.active_queue
+            if getattr(j.state, 'value', str(j.state)) in ("PENDING", "PRINTING", "PAUSED")]
+    operators = [o for o in obs.operators if o.is_on_shift]
+
+    candidates = [AgentAction(action_type="WAIT")]
+    if printers:
+        pid = rng.choice(printers).printer_id
+        candidates.append(AgentAction(action_type="RUN_DIAGNOSTIC", printer_id=pid))
+        candidates.append(AgentAction(action_type="PAUSE_JOB", printer_id=pid))
+        candidates.append(AgentAction(
+            action_type="REQUEST_MAINTENANCE", printer_id=pid,
+            maintenance_type="maintenance_basic"))
+        candidates.append(AgentAction(
+            action_type="REQUEST_SPOOL_SWAP", printer_id=pid, material="PLA"))
+    if jobs:
+        jid = rng.choice(jobs).job_id
+        candidates.append(AgentAction(action_type="CANCEL_JOB", job_id=jid))
+        candidates.append(AgentAction(action_type="RESUME_JOB", job_id=jid))
+        if printers:
+            candidates.append(AgentAction(
+                action_type="ASSIGN_JOB",
+                printer_id=rng.choice(printers).printer_id,
+                job_id=jid))
+    if operators:
+        oid = rng.choice(operators).operator_id
+        candidates.append(AgentAction(
+            action_type="DISPATCH_TICKET", operator_id=oid,
+            ticket_type="diagnostic_physical"))
+
+    return rng.choice(candidates)
 
 
 def dp_rules_policy(obs, gt_tags, rng):

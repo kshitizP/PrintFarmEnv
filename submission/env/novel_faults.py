@@ -52,7 +52,9 @@ def generate_anomaly_flags(
         return [], []
 
     # Only flag printers that are actively printing (where it matters)
-    printing = [p for p in printers if str(getattr(p, 'state', '')) in ("PRINTING", "WARMING_UP")]
+    printing = [p for p in printers
+                if getattr(getattr(p, 'state', ''), 'value', str(getattr(p, 'state', '')))
+                in ("PRINTING", "WARMING_UP")]
     if not printing:
         return [], []
 

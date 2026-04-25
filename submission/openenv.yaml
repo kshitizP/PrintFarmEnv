@@ -1,0 +1,233 @@
+spec_version: 1
+name: printfarm-env
+description: >
+  A 3D print-farm scheduling environment where an AI Dispatcher orchestrates
+  heterogeneous printers, human operator NPCs, and sensor telemetry that may be
+  corrupted. Tests multi-agent coordination (Theme 1), zero-trust sensor handling
+  (Theme 5), long-horizon planning (Theme 2), and dollar-denominated P&L reasoning.
+  Every action maps 1:1 to a real OctoPrint/Moonraker API call.
+  Augmented with unstructured signals: operator free-text notes, customer messages
+  with ambiguous urgency, and novel compound failure modes outside the 9-fault
+  taxonomy — the decisions that rule-based agents cannot handle.
+type: space
+runtime: fastapi
+app: submission.server.app:app
+port: 7860
+
+# Schema class overrides (resolved from submission.env.models)
+action: FarmAction
+observation: FarmObservation
+
+# -------------------------------------------------------------------------
+# Models (informational — defined in submission/env/models.py)
+# -------------------------------------------------------------------------
+models:
+  FarmAction:
+    description: A single action the Dispatcher emits each step.
+    fields:
+      action:
+        type: FarmActionEnum
+        values:
+          - ASSIGN_JOB          # POST /api/job (OctoPrint)
+          - CANCEL_JOB          # POST /api/job cancel
+          - PAUSE_JOB           # POST /api/job pause
+          - RESUME_JOB          # POST /api/job resume
+          - RUN_DIAGNOSTIC      # GET /api/printer + temperature_store (Moonraker)
+          - DISPATCH_TICKET     # Write to operator work-order queue
+          - REQUEST_SPOOL_SWAP  # Sugar: auto-routed DISPATCH_TICKET(spool_swap)
+          - REQUEST_MAINTENANCE # Sugar: auto-routed DISPATCH_TICKET(maintenance_*)
+          - OVERRIDE_OPERATOR   # Cancel a queued (not in-progress) ticket
+          - WAIT
+      printer_id:
+        type: int | null
+        description: Target printer (required for most actions)
+      job_id:
+        type: str | null
+        description: Target job (required for ASSIGN_JOB, CANCEL_JOB, RESUME_JOB)
+      operator_id:
+        type: str | null
+        description: Target operator for DISPATCH_TICKET
+      ticket_type:
+        type: str | null
+        description: >
+          Work-order type for DISPATCH_TICKET. One of:
+          spool_swap, filament_reload_from_stock,
+          maintenance_basic, maintenance_full_rebuild,
+          diagnostic_physical, unjam_printer
+      ticket_id:
+        type: str | null
+        description: Ticket to cancel (OVERRIDE_OPERATOR)
+      material:
+        type: str | null
+        description: Filament material (REQUEST_SPOOL_SWAP, DISPATCH_TICKET spool_swap)
+      maintenance_type:
+        type: str | null
+        description: maintenance_basic | maintenance_full_rebuild (REQUEST_MAINTENANCE)
+      reason:
+        type: str | null
+        description: Narrative reason written to Oversight log (OVERRIDE_OPERATOR)
+
+  PrintJob:
+    description: A print job in the queue.
+    fields:
+      job_id:          { type: str }
+      material_required: { type: str }
+      weight_required_g: { type: float }
+      print_time_steps: { type: int }
+      priority:        { type: int, range: "1-3 (1=low, 2=normal, 3=urgent)" }
+      deadline_steps:  { type: "int | null", description: "Must complete by this step" }
+      price_usd:       { type: float, description: "Customer-paid revenue if completed" }
+      state:
+        type: JobState
+        values: [PENDING, PRINTING, PAUSED, COMPLETED, FAILED, CANCELLED]
+      progress_steps:  { type: int, description: "Steps of printing completed" }
+      total_sla_penalty: { type: float, description: "Cumulative SLA penalty accrued" }
+
+  PrinterObservation:
+    description: Observable state of a single printer (may be sensor-corrupted).
+    fields:
+      printer_id:      { type: int }
+      profile_id:      { type: str, description: "bambu_x1c | prusa_mk4 | creality_k1 | voron_24" }
+      state:
+        type: PrinterState
+        values:
+          - IDLE
+          - WARMING_UP
+          - PRINTING
+          - PAUSED              # Agent-induced pause (nozzle hot)
+          - PAUSED_RUNOUT      # Env-induced pause (filament ran out)
+          - ERROR
+          - MAINTENANCE_QUEUED # Waiting for operator to arrive
+          - MAINTENANCE        # Operator is performing maintenance
+          - OFFLINE
+      current_material:  { type: "str | null" }
+      current_job_id:    { type: "str | null" }
+      spool_weight_g:    { type: float }
+      reliability:       { type: float, range: "0.0-1.0" }
+      maintenance_due_in: { type: int }
+      fatigue_level:     { type: int, range: "0-10, catastrophic at 10" }
+      warmup_remaining:  { type: int }
+      offline_remaining: { type: int }
+      consecutive_idle_steps: { type: int }
+      outstanding_ticket_id: { type: "str | null" }
+      # --- Telemetry fields (WARNING: may be sensor-corrupted) ---
+      hotend_temp:     { type: float, description: "0.0=thermistor_open, >400=thermistor_short" }
+      fan_rpm:         { type: int,   description: "0 may indicate fan_rpm_ghost fault" }
+      webcam_hash:     { type: str,   description: "Repeated hash = webcam_freeze fault" }
+      telemetry_ts:    { type: int,   description: "Stale = klipper_mcu_disconnect" }
+      revealed_this_step: { type: bool, description: "True = ground truth (after RUN_DIAGNOSTIC)" }
+
+  OperatorObservation:
+    description: What the Dispatcher can see about each human operator NPC.
+    fields:
+      operator_id:       { type: str }
+      skill_level:       { type: str, values: [junior, senior, lead] }
+      shift_window:      { type: "list[int]", description: "[start_step, end_step]" }
+      queue_capacity:    { type: int }
+      current_fatigue:   { type: float, range: "0.0-0.8" }
+      is_on_shift:       { type: bool }
+      queue_size:        { type: int }
+      current_ticket_id: { type: "str | null" }
+      busy_until:        { type: int }
+      printer_visit_counts:    { type: "dict[int, int]" }
+      pattern_recommendations: { type: "list[str]" }
+
+  FarmObservation:
+    description: Full farm state returned from step().
+    fields:
+      active_queue:   { type: "list[PrintJob]" }
+      printers:       { type: "list[PrinterObservation]" }
+      operators:      { type: "list[OperatorObservation]" }
+      inventory:      { type: "dict[str, float]", description: "Material → grams" }
+      time_step:      { type: int }
+      max_steps:      { type: int }
+      reward:         { type: float, description: "Normalised score [0,1]" }
+      done:           { type: bool }
+      # Economic summary
+      net_profit_usd:     { type: float, description: "Cumulative P&L in dollars" }
+      total_labor_billed: { type: float, description: "Cumulative operator labor cost" }
+      # Unstructured signals (the novel augmentation)
+      operator_notes:   { type: "list[str]", description: "Free-text operator notes this step" }
+      customer_messages: { type: "list[dict]", description: "Customer messages with ambiguous urgency" }
+      anomaly_flags:    { type: "list[str]", description: "Novel compound fault signals" }
+      # Per-step extras
+      ticket_events:    { type: "list[dict]", description: "Ticket completions this step" }
+      oversight_log:    { type: "list[dict]", description: "Last 10 audit log entries" }
+      reward_breakdown: { type: "dict[str, float]", description: "action/labor/physics/sla deltas" }
+      metadata:         { type: dict }
+
+# -------------------------------------------------------------------------
+# Tasks
+# -------------------------------------------------------------------------
+tasks:
+  # --- Warmup (Round 1 regression suite) ---
+  - id: task_0_1
+    name: Traffic Jam
+    difficulty: warmup
+    description: >
+      1 printer, 5 jobs, 25 steps. Tests basic material batching and deadline
+      prioritisation. No sensor failures. Zero stochastic noise.
+
+  - id: task_0_2
+    name: Spool Runout
+    difficulty: warmup
+    description: >
+      2 printers, 2 jobs, 30 steps. A large PLA job on a printer with insufficient
+      filament triggers PAUSED_RUNOUT mid-print. Agent must REQUEST_SPOOL_SWAP
+      and RESUME_JOB rather than cancelling.
+
+  - id: task_0_3
+    name: Thermal Cooldown
+    difficulty: warmup
+    description: >
+      2 printers, 3 jobs, 30 steps. One printer starts at fatigue_level=7 —
+      near the catastrophic threshold. Agent must manage maintenance timing
+      while keeping the secondary printer productive.
+
+  # --- Round 2 blocking tasks ---
+  - id: task_1
+    name: Human Latency Coordination
+    difficulty: medium
+    theme: Multi-Agent (Theme 1)
+    description: >
+      8 printers (4 models), 3 operators (2 junior + 1 senior), 6 jobs, 60 steps.
+      Two printers start with wrong material, forcing swap-ticket decisions.
+      Tests operator queue management, ticket routing, and latency tolerance.
+
+  - id: task_2
+    name: Sensor Trust Calibration
+    difficulty: medium
+    theme: Zero-Trust (Theme 5)
+    description: >
+      5 printers, 4 jobs, 60 steps. Three scheduled sensor failures
+      (thermistor_open, filament_sensor_false_runout, webcam_freeze).
+      All stochastic rates zeroed — only deterministic faults fire.
+      Tests selective use of RUN_DIAGNOSTIC vs wasting operator time on false alarms.
+
+  - id: task_3
+    name: Disagreement Resolution
+    difficulty: hard
+    theme: Multi-Agent + Zero-Trust
+    description: >
+      4 printers, 3 jobs, 60 steps. Printer 1 has thermistor_open while
+      operator reports "printing fine". Printer 3 has progress_drift while
+      operator is silent. Agent must resolve conflicting signals correctly.
+
+  # --- Stretch tasks ---
+  - id: task_4
+    name: Long-Horizon Maintenance Planning
+    difficulty: hard
+    theme: Long-Horizon (Theme 2)
+    description: >
+      6 printers, 4 operators (incl. lead), 6 jobs, 90 steps. Two printers
+      near maintenance threshold at start; a third develops bed_level_drift
+      mid-episode. Agent must schedule maintenance at natural idle windows.
+
+  - id: task_5
+    name: Economic Stress Test
+    difficulty: expert
+    theme: World Modeling + P&L (held-out eval)
+    description: >
+      6 printers, 4 operators, 15 jobs (4 urgent, 8 normal, 3 low), 90 steps.
+      Limited inventory. Correct play involves triaging low-priority jobs to
+      protect urgent margins. NOT included in SFT/DPO training data.

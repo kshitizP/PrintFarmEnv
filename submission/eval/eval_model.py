@@ -19,7 +19,11 @@ import time
 from pathlib import Path
 from collections import defaultdict
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_here = Path(__file__).resolve().parent
+for _candidate in [_here.parent, _here.parent.parent]:
+    if (_candidate / "submission" / "__init__.py").exists():
+        sys.path.insert(0, str(_candidate))
+        break
 
 from submission.env.decision_point import DecisionPointEnv, _rules_action
 from submission.env.models import FarmAction, FarmActionEnum

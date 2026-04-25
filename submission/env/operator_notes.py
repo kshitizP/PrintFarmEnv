@@ -121,7 +121,8 @@ def generate_notes(
         pid = rng.choice(printers).printer_id if printers else 1
 
         # Pick a job for {job_id}
-        pending_jobs = [j for j in jobs if hasattr(j, 'state') and str(j.state) in ("PENDING", "PRINTING")]
+        pending_jobs = [j for j in jobs if hasattr(j, 'state')
+                        and getattr(j.state, 'value', str(j.state)) in ("PENDING", "PRINTING")]
         job_id = rng.choice(pending_jobs).job_id if pending_jobs else "j1"
 
         # Format the text

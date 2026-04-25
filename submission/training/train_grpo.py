@@ -25,7 +25,11 @@ from pathlib import Path
 import torch
 
 # Ensure submission is importable
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_here = Path(__file__).resolve().parent
+for _candidate in [_here.parent, _here.parent.parent]:
+    if (_candidate / "submission" / "__init__.py").exists():
+        sys.path.insert(0, str(_candidate))
+        break
 
 
 def parse_args():
@@ -93,6 +97,7 @@ def main():
         prompt_records.append({
             "task_id": p["task_id"],
             "seed": p["seed"],
+            "target_signal": p.get("target_signal", "any"),
             "prompt_length": len(p["prompt"]),
             "has_notes": bool(p["decision_obs"].operator_notes),
             "has_messages": bool(p["decision_obs"].customer_messages),

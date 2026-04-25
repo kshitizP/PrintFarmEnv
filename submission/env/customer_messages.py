@@ -107,7 +107,8 @@ def generate_messages(
     template = rng.choice(TEMPLATES)
 
     # Pick a job for this message
-    active_jobs = [j for j in jobs if hasattr(j, 'state') and str(j.state) in ("PENDING", "PRINTING", "PAUSED")]
+    active_jobs = [j for j in jobs if hasattr(j, 'state')
+                   and getattr(j.state, 'value', str(j.state)) in ("PENDING", "PRINTING", "PAUSED")]
     if not active_jobs:
         return [], []
 

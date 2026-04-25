@@ -12,7 +12,9 @@ import json
 import random
 from typing import Any, Dict, List, Tuple
 
-from submission.env.decision_point import DecisionPointEnv, _rules_action, K_HORIZON
+from submission.env.decision_point import (
+    DecisionPointEnv, _rules_action, K_HORIZON, SIGNAL_TYPES, signal_present,
+)
 from submission.env.models import FarmAction, FarmActionEnum
 from submission.shared.serialize import serialize_obs
 from submission.shared.parse_action import parse_action, action_to_farm_action, AgentAction
@@ -87,11 +89,17 @@ def generate_decision_prompts(
 ) -> List[Dict[str, Any]]:
     """Generate decision-point prompts from the environment.
 
+    Round-robins across SIGNAL_TYPES so that each signal type (notes, messages,
+    anomalies, structured) gets equal representation. Without this, the ~40%
+    per-step probability of operator_notes crowds out messages (20%) and
+    anomaly_flags (15%), causing those reward components to never fire.
+
     Returns a list of dicts, each with:
         - prompt: the chat-formatted prompt string
         - messages: list of message dicts for chat template
         - task_id: which task this came from
         - seed: the seed used
+        - target_signal: which signal type triggered this decision point
         - ground_truth_tags: hidden tags for reward computation
         - decision_obs: the raw observation at the decision point
     """
@@ -100,13 +108,29 @@ def generate_decision_prompts(
 
     rng = random.Random(seed)
     prompts = []
+    skipped = 0
+    attempts = 0
+    max_attempts = n_prompts * 4  # allow retries for rare signals
 
-    for i in range(n_prompts):
-        task_id = tasks[i % len(tasks)]
+    signal_idx = 0  # cycles through SIGNAL_TYPES
+
+    while len(prompts) < n_prompts and attempts < max_attempts:
+        attempts += 1
+        task_id = tasks[attempts % len(tasks)]
         ep_seed = rng.randint(0, 2**31)
 
+        target_signal = SIGNAL_TYPES[signal_idx % len(SIGNAL_TYPES)]
+        signal_idx += 1
+
         dp_env = DecisionPointEnv(k_horizon=K_HORIZON)
-        serialized, obs = dp_env.reset(seed=ep_seed, task_id=task_id)
+        serialized, obs = dp_env.reset(
+            seed=ep_seed, task_id=task_id, target_signal=target_signal,
+        )
+
+        # Skip if the target signal did not appear within max_steps_to_decision
+        if not signal_present(obs, target_signal):
+            skipped += 1
+            continue
 
         compressed = _compress_obs_json(serialized)
         obs_text = format_observation_as_text(compressed)
@@ -120,11 +144,15 @@ def generate_decision_prompts(
             "messages": messages,
             "task_id": task_id,
             "seed": ep_seed,
+            "target_signal": target_signal,
             "ground_truth_tags": dp_env.get_decision_tags(),
             "decision_obs": obs,
             "observation_text": obs_text,
         })
 
+    if skipped > 0:
+        print(f"[rollout] Skipped {skipped}/{attempts} attempts "
+              f"(target signal not found in {90} steps)")
     return prompts
 
 

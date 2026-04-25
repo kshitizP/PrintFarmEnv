@@ -22,8 +22,14 @@ import random
 import sys
 from pathlib import Path
 
-# Ensure submission is importable
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+# Ensure submission is importable whether running from the original dev repo
+# (where tests/ is at submission/tests/) or from a spun-out repo (where
+# tests/ is at the root and submission/ is a sibling directory).
+_here = Path(__file__).resolve().parent
+for _candidate in [_here.parent, _here.parent.parent]:
+    if (_candidate / "submission" / "__init__.py").exists():
+        sys.path.insert(0, str(_candidate))
+        break
 
 from submission.env.env import PrintFarmEnvironment
 from submission.env.models import FarmAction, FarmActionEnum, FarmObservation

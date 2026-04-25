@@ -2,9 +2,9 @@
   "full_random": {
     "label": "random",
     "n_episodes": 15,
-    "avg_reward": 0.02756200844671203,
+    "avg_reward": 0.025353807454648523,
     "min_reward": 0.001,
-    "max_reward": 0.14741834523809533,
+    "max_reward": 0.1534390833333332,
     "action_distribution": {
       "CANCEL_JOB": 116,
       "ASSIGN_JOB": 98,
@@ -33,7 +33,7 @@
       {
         "task_id": "task_3",
         "seed": 458,
-        "reward": 0.07920291666666682,
+        "reward": 0.1534390833333332,
         "steps": 60
       },
       {
@@ -57,13 +57,13 @@
       {
         "task_id": "task_2",
         "seed": 129,
-        "reward": 0.106999181547619,
+        "reward": 0.001,
         "steps": 60
       },
       {
         "task_id": "task_3",
         "seed": 463,
-        "reward": 0.14741834523809533,
+        "reward": 0.1460583452380953,
         "steps": 60
       },
       {
@@ -113,17 +113,19 @@
   "full_rules": {
     "label": "rules",
     "n_episodes": 15,
-    "avg_reward": 0.037571428571428686,
+    "avg_reward": 0.10357116084895521,
     "min_reward": 0.001,
-    "max_reward": 0.11200000000000024,
+    "max_reward": 0.3515904411764714,
     "action_distribution": {
-      "WAIT": 1080
+      "ASSIGN_JOB": 10,
+      "WAIT": 1065,
+      "DISPATCH_TICKET": 5
     },
     "episodes": [
       {
         "task_id": "task_1",
         "seed": 42,
-        "reward": 0.001,
+        "reward": 0.3515904411764714,
         "steps": 60
       },
       {
@@ -153,7 +155,7 @@
       {
         "task_id": "task_1",
         "seed": 47,
-        "reward": 0.001,
+        "reward": 0.3515904411764714,
         "steps": 60
       },
       {
@@ -183,7 +185,7 @@
       {
         "task_id": "task_1",
         "seed": 52,
-        "reward": 0.001,
+        "reward": 0.28981510180995507,
         "steps": 60
       },
       {
@@ -316,825 +318,543 @@
   },
   "dp_random": {
     "label": "dp_random",
-    "n_episodes": 20,
-    "avg_reward": -0.007727347443964845,
+    "n_episodes": 11,
+    "avg_reward": -0.1270267067360195,
     "avg_components": {
-      "r_economic": -0.0002273474439648471,
-      "r_format": 0.0,
-      "r_fault_precision": -0.005,
-      "r_message_handling": 0.0,
-      "r_unnecessary_action": -0.0025,
-      "total": -0.007727347443964845
+      "r_format": -0.09999999999999999,
+      "r_economic": 0.0002460205367077602,
+      "r_fault_precision": -0.0409090909090909,
+      "r_message_handling": 0.03636363636363637,
+      "r_unnecessary_action": -0.022727272727272728,
+      "r_novel_fault": 0.0,
+      "total": -0.1270267067360195
     },
     "episodes": [
       {
         "task_id": "task_1",
         "seed": 42,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.20022885294117648,
         "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
+          "r_format": -0.1,
+          "r_economic": -0.00022885294117647615,
+          "r_fault_precision": -0.05,
           "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_unnecessary_action": -0.05,
+          "r_novel_fault": 0.0,
+          "total": -0.20022885294117648
         }
       },
       {
         "task_id": "task_2",
         "seed": 124,
-        "reward_total": -0.00033571428571428364,
+        "target_signal": "messages",
+        "reward_total": -0.2001342857142857,
         "components": {
-          "r_economic": -0.00033571428571428364,
-          "r_format": 0.0,
+          "r_format": -0.1,
+          "r_economic": -0.00013428571428571347,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": -0.00033571428571428364
-        }
-      },
-      {
-        "task_id": "task_3",
-        "seed": 458,
-        "reward_total": -0.15034000000000003,
-        "components": {
-          "r_economic": -0.00034000000000000696,
-          "r_format": 0.0,
-          "r_fault_precision": -0.1,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": -0.05,
-          "total": -0.15034000000000003
-        }
-      },
-      {
-        "task_id": "task_4",
-        "seed": 792,
-        "reward_total": -0.0003149253731343338,
-        "components": {
-          "r_economic": -0.0003149253731343338,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.0003149253731343338
+          "r_novel_fault": 0.0,
+          "total": -0.2001342857142857
         }
       },
       {
         "task_id": "task_5",
         "seed": 1014,
-        "reward_total": -0.000308130081300817,
+        "target_signal": "notes",
+        "reward_total": -0.1999821991869919,
         "components": {
-          "r_economic": -0.000308130081300817,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
+          "r_format": -0.1,
+          "r_economic": 1.7800813008128636e-05,
+          "r_fault_precision": -0.05,
           "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.000308130081300817
+          "r_unnecessary_action": -0.05,
+          "r_novel_fault": 0.0,
+          "total": -0.1999821991869919
         }
       },
       {
         "task_id": "task_1",
         "seed": 47,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": -0.3001435294117647,
         "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_format": -0.1,
+          "r_economic": -0.00014352941176470457,
+          "r_fault_precision": -0.1,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_2",
-        "seed": 129,
-        "reward_total": -0.00033571428571428364,
-        "components": {
-          "r_economic": -0.00033571428571428364,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.00033571428571428364
-        }
-      },
-      {
-        "task_id": "task_3",
-        "seed": 463,
-        "reward_total": -0.00034000000000000696,
-        "components": {
-          "r_economic": -0.00034000000000000696,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.00034000000000000696
+          "r_novel_fault": 0.0,
+          "total": -0.3001435294117647
         }
       },
       {
         "task_id": "task_4",
         "seed": 797,
-        "reward_total": -0.0003149253731343338,
+        "target_signal": "notes",
+        "reward_total": -0.2,
         "components": {
-          "r_economic": -0.0003149253731343338,
-          "r_format": 0.0,
+          "r_format": -0.1,
+          "r_economic": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": -0.0003149253731343338
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_5",
         "seed": 1019,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.3009028245257453,
         "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
+          "r_format": -0.1,
+          "r_economic": 0.0009028245257452606,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.3009028245257453
         }
       },
       {
         "task_id": "task_1",
         "seed": 52,
-        "reward_total": 0.0,
+        "target_signal": "anomalies",
+        "reward_total": -0.20013411764705885,
         "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
+          "r_format": -0.1,
+          "r_economic": -0.00013411764705882457,
+          "r_fault_precision": -0.05,
           "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_2",
-        "seed": 134,
-        "reward_total": -0.00033571428571428364,
-        "components": {
-          "r_economic": -0.00033571428571428364,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.00033571428571428364
+          "r_unnecessary_action": -0.05,
+          "r_novel_fault": 0.0,
+          "total": -0.20013411764705885
         }
       },
       {
         "task_id": "task_3",
         "seed": 468,
-        "reward_total": -0.00033999999999999585,
+        "target_signal": "notes",
+        "reward_total": -0.09767612571428572,
         "components": {
-          "r_economic": -0.00033999999999999585,
-          "r_format": 0.0,
+          "r_format": -0.1,
+          "r_economic": 0.002323874285714287,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": -0.00033999999999999585
+          "r_novel_fault": 0.0,
+          "total": -0.09767612571428572
         }
       },
       {
         "task_id": "task_4",
         "seed": 802,
-        "reward_total": -0.0003149253731343338,
+        "target_signal": "messages",
+        "reward_total": 0.2998740298507463,
         "components": {
-          "r_economic": -0.0003149253731343338,
-          "r_format": 0.0,
+          "r_format": -0.1,
+          "r_economic": -0.00012597014925373352,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": -0.0003149253731343338
-        }
-      },
-      {
-        "task_id": "task_5",
-        "seed": 1024,
-        "reward_total": -0.000308130081300817,
-        "components": {
-          "r_economic": -0.000308130081300817,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.000308130081300817
-        }
-      },
-      {
-        "task_id": "task_1",
-        "seed": 57,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.2998740298507463
         }
       },
       {
         "task_id": "task_2",
         "seed": 139,
-        "reward_total": -0.00033571428571429476,
+        "target_signal": "notes",
+        "reward_total": -0.20010751785714287,
         "components": {
-          "r_economic": -0.00033571428571429476,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
+          "r_format": -0.1,
+          "r_economic": -0.00010751785714286033,
+          "r_fault_precision": -0.05,
           "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.00033571428571429476
+          "r_unnecessary_action": -0.05,
+          "r_novel_fault": 0.0,
+          "total": -0.20010751785714287
         }
       },
       {
         "task_id": "task_3",
         "seed": 473,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": -0.39966399999999996,
         "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_4",
-        "seed": 807,
-        "reward_total": -0.0003149253731343338,
-        "components": {
-          "r_economic": -0.0003149253731343338,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.0003149253731343338
-        }
-      },
-      {
-        "task_id": "task_5",
-        "seed": 1029,
-        "reward_total": -0.000308130081300817,
-        "components": {
-          "r_economic": -0.000308130081300817,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": -0.000308130081300817
+          "r_format": -0.1,
+          "r_economic": 0.00033599999999999857,
+          "r_fault_precision": -0.15,
+          "r_message_handling": -0.1,
+          "r_unnecessary_action": -0.05,
+          "r_novel_fault": 0.0,
+          "total": -0.39966399999999996
         }
       }
     ]
   },
   "dp_rules": {
     "label": "dp_rules",
-    "n_episodes": 20,
-    "avg_reward": 0.0,
+    "n_episodes": 11,
+    "avg_reward": -0.018181818181818177,
     "avg_components": {
+      "r_format": -0.09999999999999999,
       "r_economic": 0.0,
-      "r_format": 0.0,
       "r_fault_precision": 0.0,
-      "r_message_handling": 0.0,
+      "r_message_handling": 0.08181818181818183,
       "r_unnecessary_action": 0.0,
-      "total": 0.0
+      "r_novel_fault": 0.0,
+      "total": -0.018181818181818177
     },
     "episodes": [
       {
         "task_id": "task_1",
         "seed": 42,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_2",
         "seed": 124,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.30000000000000004,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_3",
-        "seed": 458,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_4",
-        "seed": 792,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.30000000000000004
         }
       },
       {
         "task_id": "task_5",
         "seed": 1014,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_1",
         "seed": 47,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.30000000000000004,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_2",
-        "seed": 129,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_3",
-        "seed": 463,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.30000000000000004
         }
       },
       {
         "task_id": "task_4",
         "seed": 797,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.2,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_5",
         "seed": 1019,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": -0.2,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_1",
         "seed": 52,
-        "reward_total": 0.0,
+        "target_signal": "anomalies",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_2",
-        "seed": 134,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_3",
         "seed": 468,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_4",
         "seed": 802,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": -0.2,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_5",
-        "seed": 1024,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_1",
-        "seed": 57,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_2",
         "seed": 139,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_3",
         "seed": 473,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.30000000000000004,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_4",
-        "seed": 807,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_5",
-        "seed": 1029,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.30000000000000004
         }
       }
     ]
   },
   "dp_wait": {
     "label": "dp_wait",
-    "n_episodes": 20,
-    "avg_reward": 0.0,
+    "n_episodes": 11,
+    "avg_reward": -0.018181818181818177,
     "avg_components": {
+      "r_format": -0.09999999999999999,
       "r_economic": 0.0,
-      "r_format": 0.0,
       "r_fault_precision": 0.0,
-      "r_message_handling": 0.0,
+      "r_message_handling": 0.08181818181818183,
       "r_unnecessary_action": 0.0,
-      "total": 0.0
+      "r_novel_fault": 0.0,
+      "total": -0.018181818181818177
     },
     "episodes": [
       {
         "task_id": "task_1",
         "seed": 42,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_2",
         "seed": 124,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.30000000000000004,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_3",
-        "seed": 458,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_4",
-        "seed": 792,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.30000000000000004
         }
       },
       {
         "task_id": "task_5",
         "seed": 1014,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_1",
         "seed": 47,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.30000000000000004,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_2",
-        "seed": 129,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_3",
-        "seed": 463,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.30000000000000004
         }
       },
       {
         "task_id": "task_4",
         "seed": 797,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.2,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_5",
         "seed": 1019,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": -0.2,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_1",
         "seed": 52,
-        "reward_total": 0.0,
+        "target_signal": "anomalies",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_2",
-        "seed": 134,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_3",
         "seed": 468,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_4",
         "seed": 802,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": -0.2,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": -0.1,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_5",
-        "seed": 1024,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_1",
-        "seed": 57,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.2
         }
       },
       {
         "task_id": "task_2",
         "seed": 139,
-        "reward_total": 0.0,
+        "target_signal": "notes",
+        "reward_total": -0.1,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
           "r_message_handling": 0.0,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": -0.1
         }
       },
       {
         "task_id": "task_3",
         "seed": 473,
-        "reward_total": 0.0,
+        "target_signal": "messages",
+        "reward_total": 0.30000000000000004,
         "components": {
+          "r_format": -0.1,
           "r_economic": 0.0,
-          "r_format": 0.0,
           "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
+          "r_message_handling": 0.4,
           "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_4",
-        "seed": 807,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
-        }
-      },
-      {
-        "task_id": "task_5",
-        "seed": 1029,
-        "reward_total": 0.0,
-        "components": {
-          "r_economic": 0.0,
-          "r_format": 0.0,
-          "r_fault_precision": 0.0,
-          "r_message_handling": 0.0,
-          "r_unnecessary_action": 0.0,
-          "total": 0.0
+          "r_novel_fault": 0.0,
+          "total": 0.30000000000000004
         }
       }
     ]
