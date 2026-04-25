@@ -17,7 +17,6 @@ hf jobs run \
   --flavor l4x1 \
   --timeout 5h \
   --secrets HF_TOKEN \
-  --secrets WANDB_API_KEY \
   -v hf://spaces/sikkaBolega/printfarm-env:/code:ro \
   pytorch/pytorch:2.4.1-cuda12.1-cudnn9-devel \
   bash -c "

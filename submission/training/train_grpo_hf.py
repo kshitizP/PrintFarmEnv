@@ -242,7 +242,7 @@ def main():
             with open(self.log_file, "a") as fh:
                 fh.write(json.dumps(record) + "\n")
 
-            if wandb.run:
+            if use_wandb and wandb.run:
                 wandb.log({"monitor/reward_avg": reward_avg,
                            "monitor/tag_pct": tag_pct,
                            "monitor/parse_pct": parse_pct,
@@ -259,6 +259,12 @@ def main():
     from trl import GRPOConfig, GRPOTrainer
     from datasets import Dataset
 
+    # Auto-detect W&B: only enable if WANDB_API_KEY is set in env, else fall
+    # back to monitor.jsonl-only logging (still captures everything we need).
+    import os
+    use_wandb = bool(os.environ.get("WANDB_API_KEY"))
+    print(f"W&B logging: {'ENABLED' if use_wandb else 'DISABLED (no WANDB_API_KEY)'}")
+
     grpo_config = GRPOConfig(
         output_dir=str(out_dir),
         learning_rate=args.learning_rate,
@@ -271,7 +277,7 @@ def main():
         max_steps=args.max_steps,
         save_steps=args.save_steps,
         logging_steps=1,
-        report_to="wandb",
+        report_to="wandb" if use_wandb else "none",
         seed=args.seed,
         bf16=True,
         fp16=False,

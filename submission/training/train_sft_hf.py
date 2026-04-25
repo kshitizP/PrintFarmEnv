@@ -23,6 +23,7 @@ Usage (direct, after installing deps):
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -110,7 +111,7 @@ def main():
             learning_rate=args.learning_rate,
             logging_steps=5,
             save_strategy="no",
-            report_to="wandb",
+            report_to="wandb" if os.environ.get("WANDB_API_KEY") else "none",
             seed=args.seed,
             max_length=args.max_seq_length,
             bf16=True,
