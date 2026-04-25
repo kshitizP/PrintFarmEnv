@@ -41,7 +41,8 @@ def parse_args():
     p.add_argument("--n_prompts", type=int, default=100,
                    help="Number of decision prompts to generate")
     p.add_argument("--n_generations", type=int, default=8,
-                   help="Completions per prompt for GRPO")
+                   help="Completions per prompt for GRPO (raised from 4 → 8 "
+                        "to increase variance and prevent action collapse)")
     p.add_argument("--learning_rate", type=float, default=5e-6)
     p.add_argument("--lora_rank", type=int, default=16)
     p.add_argument("--max_completion_length", type=int, default=128)
@@ -59,6 +60,11 @@ def parse_args():
                    help="Tasks to use for training prompts")
     p.add_argument("--out", default=None,
                    help="Alias for --output (if both set, --out wins)")
+    p.add_argument("--init_adapter", default=None,
+                   help="Path to SFT-warm adapter to initialise from (recommended)")
+    p.add_argument("--temperature", type=float, default=0.7,
+                   help="Sampling temperature for GRPO rollouts (raised from 0.3 "
+                        "to encourage exploration after EV-trap collapse)")
     return p.parse_args()
 
 
@@ -161,6 +167,16 @@ def main():
             torch_dtype=torch_dtype,
             device_map=device_map,
         )
+
+        # SFT warm-start: load existing LoRA adapter as starting point.
+        # GRPOTrainer wraps it in a new PEFT layer, so we merge the SFT
+        # adapter into base weights first, then GRPO trains a fresh LoRA.
+        if args.init_adapter:
+            from peft import PeftModel
+            print(f"Loading SFT warm-start adapter from {args.init_adapter}...")
+            sft_model = PeftModel.from_pretrained(model, args.init_adapter)
+            model = sft_model.merge_and_unload()
+            print(f"SFT adapter merged into base model. GRPO will train a new LoRA on top.")
 
         peft_cfg = LoraConfig(
             r=args.lora_rank,
@@ -483,6 +499,7 @@ def main():
             num_generations=args.n_generations,
             generation_batch_size=args.n_generations,
             max_completion_length=args.max_completion_length,
+            temperature=args.temperature,
             num_train_epochs=1,
             max_steps=args.max_steps,
             save_steps=args.save_steps,

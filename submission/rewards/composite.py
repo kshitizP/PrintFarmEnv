@@ -1,15 +1,32 @@
 """
-Composite reward function — sums all components and logs them separately.
+Composite reward function — gates throughput rewards by a SafetyGate so the
+agent cannot farm easy components while ignoring visible anomalies.
 
 Components:
   r_format:             format + anti-echo                  [-0.3, +0.1]
   r_economic:           net P&L delta vs rules baseline     [-0.4, +0.4]
-  r_fault_precision:    evidence-gated investigation        [-0.15, +0.4]
+  r_fault_precision:    evidence-gated investigation        [-0.4, +0.4]
+                        (negligence penalty included)
   r_message_handling:   correct customer response?          [-0.1, +0.4]
   r_unnecessary_action: penalty for spam                    {-0.05, 0.0}
   r_novel_fault:        catching novel faults preemptively  {0.0, +0.4}
 
-Total = sum of all components.
+Aggregation (state-conditioned hierarchy):
+  safety_gate = 0 if (visible threat exists AND agent is NOT investigating) else 1
+  total = r_format
+        + (r_economic + r_message_handling) * safety_gate
+        + r_fault_precision + r_novel_fault + r_unnecessary_action
+
+Note: r_format is intentionally NOT gated. If we gated it, outputting
+unparseable garbage during a fire would be "free" (-0.3 → 0.0) compared to
+guessing the wrong investigation target (-0.1 / -0.15). r_format must always
+enforce JSON structure regardless of farm state.
+
+Rationale: a dispatcher answering a Slack message while a printer eats itself
+is a net-negative action. Multiplicative gating on the throughput rewards
+(economic + message_handling) makes that explicit: when there's a fire, the
+only way to score is to put it out. Once the farm is clear, all rewards are
+unlocked again.
 """
 
 import math
@@ -19,10 +36,15 @@ from typing import Any, Dict, List, Optional
 from submission.shared.parse_action import AgentAction
 from .r_format import r_format
 from .r_economic import r_economic
-from .r_fault_precision import r_fault_precision
+from .r_fault_precision import r_fault_precision, _find_visible_threats
 from .r_message_handling import r_message_handling
 from .r_unnecessary_action import r_unnecessary_action
 from .r_novel_fault import r_novel_fault
+
+
+_INVESTIGATION_ACTIONS = {
+    "RUN_DIAGNOSTIC", "REQUEST_MAINTENANCE", "DISPATCH_TICKET", "PAUSE_JOB",
+}
 
 
 @dataclass
@@ -107,16 +129,39 @@ def compute_reward(
             novel_fault=r_novel_fault(parsed_action, anomaly_tags, observation=observation),
         )
 
+    # ── State-conditioned SafetyGate ──────────────────────────────────────────
+    # If any printer has a real anomaly visible in the observation AND the
+    # agent's action is NOT an investigation action, gate throughput rewards.
+    threat_pids = _find_visible_threats(observation, anomaly_tags, note_tags) \
+                  if observation is not None else set()
+    is_investigation = (
+        parsed_action is not None
+        and parsed_action.action_type in _INVESTIGATION_ACTIONS
+    )
+    safety_gate = 0.0 if (threat_pids and not is_investigation) else 1.0
+
+    # r_format is NEVER gated — JSON structure must always be enforced.
+    # r_economic and r_message_handling are gated to prevent farming throughput
+    # rewards while ignoring fires.
+    gated_economic = breakdown.economic * safety_gate
+    gated_message = breakdown.message_handling * safety_gate
+
     components = {
-        "r_format": breakdown.format,
-        "r_economic": breakdown.economic,
+        "r_format": breakdown.format,            # un-gated
+        "r_economic": gated_economic,
         "r_fault_precision": breakdown.fault_precision,
-        "r_message_handling": breakdown.message_handling,
+        "r_message_handling": gated_message,
         "r_unnecessary_action": breakdown.unnecessary_action,
         "r_novel_fault": breakdown.novel_fault,
+        "safety_gate": safety_gate,               # surfaced for monitor.jsonl
     }
 
-    total = breakdown.total
+    total = (
+        breakdown.format
+        + gated_economic + gated_message
+        + breakdown.fault_precision + breakdown.novel_fault
+        + breakdown.unnecessary_action
+    )
 
     # Safety: NaN check
     if not math.isfinite(total):

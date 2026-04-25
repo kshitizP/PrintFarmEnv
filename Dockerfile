@@ -11,4 +11,4 @@ COPY --chown=user . /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Start the web server for Hugging Face Spaces on port 7860
-CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "submission.server.app:app", "--host", "0.0.0.0", "--port", "7860"]
