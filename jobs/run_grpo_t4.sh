@@ -25,7 +25,7 @@ hf jobs run \
     cd /code
     python -m submission.training.train_grpo_hf \
       --model Qwen/Qwen2.5-3B-Instruct \
-      --init_adapter sikkaBolega/printfarm-sft-adapter \
+      --init_model sikkaBolega/printfarm-sft-merged \
       --max_steps 200 \
       --n_generations 4 \
       --max_completion_length 128 \

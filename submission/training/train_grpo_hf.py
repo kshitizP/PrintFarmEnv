@@ -44,8 +44,12 @@ import torch
 def parse_args():
     p = argparse.ArgumentParser(description="GRPO training (HF Jobs / Unsloth)")
     p.add_argument("--model", default="Qwen/Qwen2.5-3B-Instruct")
+    p.add_argument("--init_model", default=None,
+                   help="Pre-merged SFT model — HF Hub repo ID (preferred over --init_adapter). "
+                        "Load with 4-bit directly; avoids PeftModel merge dtype bugs in Unsloth.")
     p.add_argument("--init_adapter", default=None,
-                   help="SFT adapter — HF Hub repo ID or local path (strongly recommended)")
+                   help="(legacy) SFT LoRA adapter repo — triggers PEFT merge which is "
+                        "unreliable with Unsloth. Prefer --init_model instead.")
     p.add_argument("--max_steps", type=int, default=200)
     p.add_argument("--n_prompts", type=int, default=100)
     p.add_argument("--n_generations", type=int, default=8,
@@ -86,40 +90,33 @@ def main():
     )
     print(f"Generated {len(prompts)} prompts")
 
-    # ── 2. Load base model + merge SFT adapter ────────────────────────────────
-    print(f"\n{'='*60}\nStep 2: Loading {args.model} with Unsloth\n{'='*60}")
+    # ── 2. Load base model (or pre-merged SFT model) ──────────────────────────
+    # Unsloth's fast_lora kernels break when get_peft_model() is called on a model
+    # that went through PeftModel.merge_and_unload() — internal dtype tracking
+    # ends up inconsistent (Half vs Float in matmul_lora). The fix is to pre-merge
+    # the SFT adapter outside this script and load the resulting full model here
+    # with the normal 4-bit path (no PEFT at all in the GRPO script).
     from unsloth import FastLanguageModel
 
-    # Detect bf16 support early — needed for both load dtype and bf16 flag later.
-    bf16_ok = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
-    target_dtype = torch.bfloat16 if bf16_ok else torch.float16
-    print(f"Mixed precision: {'bf16' if bf16_ok else 'fp16'}")
-
-    if args.init_adapter:
-        # When merging an SFT adapter we skip 4-bit quantization: merge_and_unload()
-        # would dequantize to float32 anyway, leaving a dtype mismatch (bf16 activations
-        # vs float32 weights). Loading full-precision from the start is cleaner and
-        # fits in 24 GB (3B × 2 B ≈ 6 GB + GRPO buffers ≈ 20–22 GB total on L4).
-        print(f"Loading base at {target_dtype} (no 4-bit) for dtype-safe adapter merge...")
-        model, tokenizer = FastLanguageModel.from_pretrained(
-            model_name=args.model,
-            max_seq_length=args.max_seq_length,
-            load_in_4bit=False,
-            dtype=target_dtype,
-        )
-        print(f"Merging SFT adapter from {args.init_adapter} into base...")
-        from peft import PeftModel
-        sft = PeftModel.from_pretrained(model, args.init_adapter)
-        model = sft.merge_and_unload()
-        model = model.to(target_dtype)  # guard against any float32 residue
-        print(f"SFT adapter merged → {target_dtype} — GRPO will train a fresh LoRA on top")
+    base_model_id = args.init_model or args.model
+    if args.init_model:
+        print(f"\n{'='*60}\nStep 2: Loading pre-merged SFT model {args.init_model}\n{'='*60}")
     else:
-        model, tokenizer = FastLanguageModel.from_pretrained(
-            model_name=args.model,
-            max_seq_length=args.max_seq_length,
-            load_in_4bit=True,
-            dtype=None,
-        )
+        print(f"\n{'='*60}\nStep 2: Loading {args.model} with Unsloth\n{'='*60}")
+        if args.init_adapter:
+            print("WARNING: --init_adapter is deprecated and unreliable with Unsloth.")
+            print("Run jobs/merge_sft.sh first, then use --init_model instead.")
+
+    model, tokenizer = FastLanguageModel.from_pretrained(
+        model_name=base_model_id,
+        max_seq_length=args.max_seq_length,
+        load_in_4bit=True,
+        dtype=None,
+    )
+
+    # Detect bf16 support — needed for GRPOConfig flags below.
+    bf16_ok = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    print(f"Mixed precision: {'bf16' if bf16_ok else 'fp16'}")
 
     model = FastLanguageModel.get_peft_model(
         model,
