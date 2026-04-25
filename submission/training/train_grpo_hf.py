@@ -90,22 +90,21 @@ def main():
     )
     print(f"Generated {len(prompts)} prompts")
 
-    # ── 2. Load base model (or pre-merged SFT model) ──────────────────────────
-    # Unsloth's fast_lora kernels break when get_peft_model() is called on a model
-    # that went through PeftModel.merge_and_unload() — internal dtype tracking
-    # ends up inconsistent (Half vs Float in matmul_lora). The fix is to pre-merge
-    # the SFT adapter outside this script and load the resulting full model here
-    # with the normal 4-bit path (no PEFT at all in the GRPO script).
+    # ── 2. Load model + attach GRPO LoRA ──────────────────────────────────────
+    # We use Unsloth for fast model loading / 4-bit quant, but apply LoRA with
+    # standard PEFT (not FastLanguageModel.get_peft_model). Reason: Unsloth 2026.4.8
+    # patches LoRA layers with custom fast_lora kernels whose matmul_lora dtype
+    # tracking is broken for GRPO — manifests as "Half vs Float" RuntimeError in
+    # apply_lora_o/apply_lora_mlp_swiglu regardless of how the base model was loaded.
+    # Standard PEFT LoRA uses plain PyTorch mm which respects autocast dtype.
     from unsloth import FastLanguageModel
+    from peft import get_peft_model, LoraConfig, TaskType
 
     base_model_id = args.init_model or args.model
     if args.init_model:
         print(f"\n{'='*60}\nStep 2: Loading pre-merged SFT model {args.init_model}\n{'='*60}")
     else:
-        print(f"\n{'='*60}\nStep 2: Loading {args.model} with Unsloth\n{'='*60}")
-        if args.init_adapter:
-            print("WARNING: --init_adapter is deprecated and unreliable with Unsloth.")
-            print("Run jobs/merge_sft.sh first, then use --init_model instead.")
+        print(f"\n{'='*60}\nStep 2: Loading base model {args.model}\n{'='*60}")
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=base_model_id,
@@ -118,16 +117,19 @@ def main():
     bf16_ok = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
     print(f"Mixed precision: {'bf16' if bf16_ok else 'fp16'}")
 
-    model = FastLanguageModel.get_peft_model(
-        model,
+    # Standard PEFT LoRA — bypasses Unsloth's fast_lora dtype-broken kernels.
+    lora_config = LoraConfig(
         r=args.lora_rank,
         lora_alpha=args.lora_rank,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                         "gate_proj", "up_proj", "down_proj"],
         lora_dropout=0.0,
         bias="none",
-        use_gradient_checkpointing="unsloth",
+        task_type=TaskType.CAUSAL_LM,
     )
+    model = get_peft_model(model, lora_config)
+    model.enable_input_require_grads()
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     total = sum(p.numel() for p in model.parameters())
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Parameters: {total:,}  trainable: {trainable:,} ({100*trainable/total:.2f}%)")
@@ -329,12 +331,19 @@ def main():
         tokenizer.push_to_hub(args.hub_adapter_repo, private=False)
         print(f"Adapter: https://huggingface.co/{args.hub_adapter_repo}")
 
-        # Push merged 16-bit model (Unsloth safe merge path)
+        # Push merged 16-bit model via standard PEFT merge + huggingface_hub upload
         print(f"\nMerging + pushing to {args.hub_merged_repo} ...")
-        model.push_to_hub_merged(
-            args.hub_merged_repo, tokenizer,
-            save_method="merged_16bit", private=False,
-        )
+        import os
+        merged_path = "/tmp/grpo-merged"
+        os.makedirs(merged_path, exist_ok=True)
+        merged_model = trainer.model.merge_and_unload()
+        merged_model.save_pretrained(merged_path)
+        tokenizer.save_pretrained(merged_path)
+        from huggingface_hub import HfApi
+        api = HfApi()
+        api.create_repo(args.hub_merged_repo, repo_type="model", exist_ok=True, private=False)
+        api.upload_folder(folder_path=merged_path, repo_id=args.hub_merged_repo,
+                          repo_type="model", commit_message="GRPO merged 16-bit model")
         print(f"Merged model: https://huggingface.co/{args.hub_merged_repo}")
 
     print(f"\n{'='*60}\nDONE — output: {out_dir}\n{'='*60}")
