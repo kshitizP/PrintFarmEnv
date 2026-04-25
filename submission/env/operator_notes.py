@@ -87,6 +87,40 @@ TEMPLATES: List[NoteTemplate] = [
                  "ambiguous", "context_dependent"),
     NoteTemplate("P{pid} temps stable but power draw seems slightly higher",
                  "ambiguous", "context_dependent"),
+
+    # --- Predictive-sounding BENIGN (false alarms, already resolved) ---
+    # Uses fault vocabulary but describes a confirmed-normal situation.
+    # Correct action: ignore. Forces model to read resolution, not just keywords.
+    NoteTemplate("P{pid} fan noise turned out to be a loose panel — tightened it, running fine now",
+                 "benign", "ignore"),
+    NoteTemplate("checked P{pid} PTFE tube after last shift report — no discoloration, looks normal",
+                 "benign", "ignore"),
+    NoteTemplate("P{pid} stringing on last job was the model design, not the printer — confirmed ok",
+                 "benign", "ignore"),
+    NoteTemplate("humidity sensor near P{pid} showed spike — facility HVAC cycled, printer unaffected",
+                 "benign", "ignore"),
+    NoteTemplate("P{pid} bed adhesion scare was old residue — cleaned with IPA, holding fine",
+                 "benign", "ignore"),
+    NoteTemplate("that clog alarm on P{pid} was a false trigger — cold pull done, extruding clean",
+                 "benign", "ignore"),
+    NoteTemplate("vibration on P{pid} was from the workbench next to it, not the printer itself",
+                 "benign", "ignore"),
+
+    # --- Benign-sounding PREDICTIVE (real faults hiding behind routine language) ---
+    # Sounds like housekeeping but the underlying fault IS real.
+    # Correct action: investigate. Forces model to read the actual content.
+    NoteTemplate("P{pid} took longer than usual to warm up this morning — happened yesterday too",
+                 "predictive", "investigate"),
+    NoteTemplate("wiped down P{pid} nozzle area, noticed some unusual residue around the tip",
+                 "predictive", "investigate"),
+    NoteTemplate("P{pid} just finished a job fine, but the surface finish was a bit rougher than normal",
+                 "predictive", "investigate"),
+    NoteTemplate("organized filament rack near P{pid} — the spool it's using felt lighter than expected",
+                 "predictive", "investigate"),
+    NoteTemplate("did routine check on P{pid}, noted the bed has some slight unevenness on the back edge",
+                 "predictive", "investigate"),
+    NoteTemplate("P{pid} print came out ok but I noticed the first few layers had inconsistent width",
+                 "predictive", "investigate"),
 ]
 
 

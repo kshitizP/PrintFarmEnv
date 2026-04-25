@@ -57,11 +57,16 @@ def parse_args():
     p.add_argument("--tasks", nargs="+",
                    default=["task_1", "task_2", "task_3", "task_4"],
                    help="Tasks to use for training prompts")
+    p.add_argument("--out", default=None,
+                   help="Alias for --output (if both set, --out wins)")
     return p.parse_args()
 
 
 def main():
     args = parse_args()
+
+    if args.out is not None:
+        args.output = args.out  # --out wins over --output
 
     if args.smoke:
         args.max_steps = 3
@@ -249,16 +254,21 @@ def main():
     prompts_list = prompts  # Capture for closure
 
     # --- Live Monitoring Callback ---
-    from collections import Counter
+    from collections import Counter, defaultdict
     from transformers import TrainerCallback
     from submission.shared.parse_action import parse_action as _parse_action, _ACTION_TAG_RE
+    from submission.training.rollout import evaluate_completion as _evaluate_completion
 
     class GRPOMonitorCallback(TrainerCallback):
         """Logs real-time diagnostics every `eval_every` steps.
 
-        Tracks: action distribution, tag compliance, echo rate,
-        reward trend, and sample completions. Writes to monitor.jsonl
-        for live tailing with: tail -f grpo_runs/.../monitor.jsonl
+        Tracks: action distribution, tag compliance, echo rate, reward trend,
+        per-signal-type reward breakdown, per-component reward means,
+        completion-length percentiles, and sample completions.
+
+        Writes to monitor.jsonl for live tailing:
+            python submission/scripts/watch_training.py --run <run_dir>
+        or: tail -f <run_dir>/monitor.jsonl
         """
 
         def __init__(self, eval_prompts, tokenizer, output_dir, eval_every=10):
@@ -287,6 +297,11 @@ def main():
             tag_ok = 0
             parse_ok = 0
             echo_count = 0
+            completion_lens = []
+
+            # Per-signal and per-component accumulators
+            signal_rewards = defaultdict(list)
+            comp_accum = defaultdict(list)
 
             for p in self.eval_prompts:
                 prompt_str = self.tokenizer.apply_chat_template(
@@ -310,6 +325,7 @@ def main():
                 has_tag = bool(_ACTION_TAG_RE.search(response))
                 parsed = _parse_action(response)
                 obs_text = p.get("observation_text", "")
+                completion_lens.append(len(response))
 
                 if has_tag:
                     tag_ok += 1
@@ -323,6 +339,17 @@ def main():
                     obs_tokens = set(obs_text.lower().split())
                     if out_tokens and len(out_tokens & obs_tokens) / len(out_tokens) > 0.5:
                         echo_count += 1
+
+                # Full reward evaluation for component and signal breakdowns
+                try:
+                    components = _evaluate_completion(response, p)
+                    sig = p.get("target_signal", "unknown")
+                    signal_rewards[sig].append(components["total"])
+                    for key in ("r_format", "r_economic", "r_fault_precision",
+                                "r_message_handling", "r_unnecessary_action", "r_novel_fault"):
+                        comp_accum[key].append(components.get(key, 0.0))
+                except Exception:
+                    pass  # monitor is best-effort; don't abort training
 
                 tag_closed = "</action>" in response
                 results.append({
@@ -339,39 +366,76 @@ def main():
             echo_pct = echo_count / n * 100
             unique_actions = len(action_counts)
 
-            # Reward trend
+            # Completion length percentiles
+            if completion_lens:
+                sorted_lens = sorted(completion_lens)
+                p50 = sorted_lens[len(sorted_lens) // 2]
+                p95 = sorted_lens[min(int(len(sorted_lens) * 0.95), len(sorted_lens) - 1)]
+            else:
+                p50 = p95 = 0
+
+            # Per-signal reward means
+            per_signal = {sig: round(sum(v) / len(v), 4)
+                          for sig, v in signal_rewards.items() if v}
+
+            # Per-component reward means
+            reward_components = {k: round(sum(v) / len(v), 4)
+                                  for k, v in comp_accum.items() if v}
+
+            # Reward trend from TRL logs
             recent_rewards = [r for s, r in self.reward_history if s > step - 20]
             reward_avg = sum(recent_rewards) / len(recent_rewards) if recent_rewards else 0.0
 
-            # Build action distribution string
-            dist_str = " ".join(f"{a}={c}" for a, c in action_counts.most_common(5))
-
-            # Health verdict
+            # Health verdict (early-warning rules)
             issues = []
-            if echo_pct > 20:
+            if echo_pct > 30:
+                issues.append(f"ECHO_HACKING={echo_pct:.0f}%")
+            elif echo_pct > 20:
                 issues.append(f"ECHO={echo_pct:.0f}%")
-            if parse_pct < 60:
+            if parse_pct < 40:
                 issues.append(f"FORMAT_FAIL={100-parse_pct:.0f}%")
             if unique_actions <= 1 and n > 2:
                 issues.append("ACTION_COLLAPSE")
             if reward_avg < -0.15:
                 issues.append(f"REWARD_LOW={reward_avg:.3f}")
+            # Signal imbalance: one signal carries ≥80% of total reward
+            if per_signal and sum(abs(v) for v in per_signal.values()) > 0:
+                total_abs = sum(abs(v) for v in per_signal.values())
+                dominant = max(per_signal, key=lambda k: abs(per_signal[k]))
+                if abs(per_signal[dominant]) / total_abs >= 0.80 and len(per_signal) > 1:
+                    issues.append(f"SIGNAL_IMBALANCE(dominant={dominant})")
+            # Component stagnation: only r_format is non-zero (model not learning task)
+            non_fmt = [v for k, v in reward_components.items()
+                       if k != "r_format" and abs(v) > 0.001]
+            if reward_components and not non_fmt and step > 20:
+                issues.append("TASK_NOT_LEARNING(only r_format moves)")
+            # Completion runaway
+            if p95 > 800:
+                issues.append(f"COMPLETION_RUNAWAY(p95={p95})")
 
             health = "HEALTHY" if not issues else "WARNING: " + ", ".join(issues)
+
+            # Build action distribution string
+            dist_str = " ".join(f"{a}={c}" for a, c in action_counts.most_common(5))
 
             # Print live
             print(f"\n{'─'*60}")
             print(f"MONITOR step={step} | reward_avg={reward_avg:+.3f} | "
                   f"tag={tag_pct:.0f}% parse={parse_pct:.0f}% echo={echo_pct:.0f}%")
             print(f"  actions: {dist_str}  ({unique_actions} unique)")
-            print(f"  status: {health}")
+            print(f"  len p50={p50} p95={p95} | status: {health}")
+            if per_signal:
+                sig_str = " ".join(f"{k}={v:+.3f}" for k, v in sorted(per_signal.items()))
+                print(f"  per_signal: {sig_str}")
+            if reward_components:
+                comp_str = " ".join(f"{k.replace('r_','')}={v:+.3f}"
+                                    for k, v in reward_components.items())
+                print(f"  components: {comp_str}")
             closed_count = sum(1 for r in results if r["tag_closed"])
-            avg_len = sum(r["len"] for r in results) / max(len(results), 1)
-            print(f"  closed_tag: {closed_count}/{n} | avg_chars: {avg_len:.0f}")
-            print(f"  sample: {results[0]['snippet']}")
+            print(f"  closed_tag: {closed_count}/{n} | sample: {results[0]['snippet'][:120]}")
             print(f"{'─'*60}")
 
-            # Write to JSONL for offline analysis
+            # Write to JSONL for offline analysis / watch_training.py
             record = {
                 "step": step,
                 "reward_avg": round(reward_avg, 4),
@@ -380,6 +444,10 @@ def main():
                 "echo_pct": round(echo_pct, 1),
                 "unique_actions": unique_actions,
                 "action_dist": dict(action_counts),
+                "completion_len_p50": p50,
+                "completion_len_p95": p95,
+                "per_signal_reward": per_signal,
+                "reward_components": reward_components,
                 "health": health,
                 "sample": results[0]["snippet"],
             }

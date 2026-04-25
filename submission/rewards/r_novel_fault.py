@@ -14,7 +14,11 @@ from typing import Any, Dict, List, Optional
 from submission.shared.parse_action import AgentAction
 
 
-NOVEL_FAULT_TYPES = {"hybrid_thermal_humidity", "intermittent_mcu", "degraded_webcam"}
+NOVEL_FAULT_TYPES = {
+    "hybrid_thermal_humidity", "intermittent_mcu", "degraded_webcam",
+    "slow_extrusion_drift", "oscillating_z_wobble", "partial_bed_delamination",
+    "resonance_buildup", "filament_moisture_absorption",
+}
 PREEMPTIVE_ACTIONS = {"REQUEST_MAINTENANCE", "DISPATCH_TICKET", "PAUSE_JOB", "RUN_DIAGNOSTIC"}
 
 
