@@ -64,15 +64,8 @@ def main():
     with open(out_dir / "config.json", "w") as f:
         json.dump(vars(args), f, indent=2)
 
-    # ── 1. Load dataset ───────────────────────────────────────────────────────
-    print(f"\n{'='*60}\nStep 1: Loading SFT dataset from {args.data}\n{'='*60}")
-    rows = [json.loads(line) for line in open(args.data) if line.strip()]
-    from datasets import Dataset
-    dataset = Dataset.from_list([{"messages": r["messages"]} for r in rows])
-    print(f"Loaded {len(dataset)} examples")
-
-    # ── 2. Load model — Unsloth 4-bit QLoRA ──────────────────────────────────
-    print(f"\n{'='*60}\nStep 2: Loading {args.model} with Unsloth\n{'='*60}")
+    # ── 1. Load model first (we need its tokenizer to format the dataset) ────
+    print(f"\n{'='*60}\nStep 1: Loading {args.model} with Unsloth\n{'='*60}")
     from unsloth import FastLanguageModel
 
     model, tokenizer = FastLanguageModel.from_pretrained(
@@ -81,6 +74,26 @@ def main():
         load_in_4bit=True,
         dtype=None,  # auto: bfloat16 on Ampere+, float16 on older
     )
+
+    # ── 2. Load + pre-format dataset ──────────────────────────────────────────
+    # Unsloth's wrapped SFTTrainer rejects: (a) raw "messages" without a
+    # formatter, AND (b) formatter + completion_only_loss=True.
+    # Solution: pre-format with chat template into a "text" column, drop
+    # completion_only_loss (train on full sequence). The action tokens still
+    # dominate the gradient since system/user portions are in the model's
+    # prior already.
+    print(f"\n{'='*60}\nStep 2: Loading SFT dataset from {args.data}\n{'='*60}")
+    rows = [json.loads(line) for line in open(args.data) if line.strip()]
+    from datasets import Dataset
+    formatted = [
+        {"text": tokenizer.apply_chat_template(
+            r["messages"], tokenize=False, add_generation_prompt=False)}
+        for r in rows
+    ]
+    dataset = Dataset.from_list(formatted)
+    print(f"Loaded {len(dataset)} examples (chat template applied)")
+
+    # ── 3. Attach LoRA ────────────────────────────────────────────────────────
     model = FastLanguageModel.get_peft_model(
         model,
         r=args.lora_rank,
@@ -96,8 +109,20 @@ def main():
     print(f"Parameters: {total:,}  trainable: {trainable:,} ({100*trainable/total:.2f}%)")
 
     # ── 3. SFT training ────────────────────────────────────────────────────────
+    # Auto-detect bf16: Ampere+ (L4, A10, A100) supports bf16; T4 (Turing) is
+    # fp16-only. Without this we crash on T4 with "Your setup doesn't support
+    # bf16/gpu — Need Ampere+ GPU with cuda>=11.0".
+    import torch
+    bf16_ok = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    print(f"Mixed precision: {'bf16' if bf16_ok else 'fp16'}")
+
     print(f"\n{'='*60}\nStep 3: SFT for {args.epochs} epochs\n{'='*60}")
     from trl import SFTTrainer, SFTConfig
+
+    steps_per_epoch = max(1, len(dataset) // (args.batch_size * args.grad_accum))
+    total_steps = steps_per_epoch * args.epochs
+    warmup_steps = max(1, int(total_steps * 0.1))
+    print(f"Total steps: {total_steps}  warmup_steps: {warmup_steps}")
 
     trainer = SFTTrainer(
         model=model,
@@ -114,11 +139,13 @@ def main():
             report_to="wandb" if os.environ.get("WANDB_API_KEY") else "none",
             seed=args.seed,
             max_length=args.max_seq_length,
-            bf16=True,
-            fp16=False,
-            warmup_ratio=0.1,
+            bf16=bf16_ok,
+            fp16=not bf16_ok,
+            warmup_steps=warmup_steps,
             lr_scheduler_type="cosine",
-            completion_only_loss=True,
+            # completion_only_loss disabled — incompatible with formatter path
+            # in Unsloth's wrapped SFTTrainer. Training on full sequence is
+            # acceptable: action tokens dominate gradient anyway.
         ),
     )
 
