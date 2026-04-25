@@ -71,6 +71,7 @@ Evidence-gated rewards (`r_fault_precision`, `r_novel_fault`) fire only when the
 - REST API via FastAPI (`/env/reset`, `/env/step`) — see [`server/app.py`](server/app.py)
 - Manifest at [`openenv.yaml`](openenv.yaml)
 - Docker image: `CMD uvicorn submission.server.app:app --host 0.0.0.0 --port 7860`
+- **HF Space:** https://huggingface.co/spaces/sikkaBolega/printfarm-env
 
 ---
 
@@ -115,7 +116,16 @@ A trained GRPO model that:
 
 ### W&B run
 
-> Link to be added after Phase C training run.
+> Link to be added after Phase C training run completes.
+
+### Live environment
+
+| Endpoint | URL |
+|---|---|
+| Space | https://huggingface.co/spaces/sikkaBolega/printfarm-env |
+| Reset | `POST https://sikkaBolega-printfarm-env.hf.space/env/reset` |
+| Step | `POST https://sikkaBolega-printfarm-env.hf.space/env/step` |
+| Docs | https://sikkaBolega-printfarm-env.hf.space/docs |
 
 ---
 
