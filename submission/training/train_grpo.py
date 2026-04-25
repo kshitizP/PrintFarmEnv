@@ -22,6 +22,8 @@ import sys
 import time
 from pathlib import Path
 
+import torch
+
 # Ensure submission is importable
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -38,7 +40,8 @@ def parse_args():
                    help="Completions per prompt for GRPO")
     p.add_argument("--learning_rate", type=float, default=5e-6)
     p.add_argument("--lora_rank", type=int, default=16)
-    p.add_argument("--max_completion_length", type=int, default=512)
+    p.add_argument("--max_completion_length", type=int, default=256)
+    p.add_argument("--max_seq_length", type=int, default=2048)
     p.add_argument("--output", default="./grpo_runs/latest",
                    help="Output directory for checkpoints")
     p.add_argument("--save_steps", type=int, default=25)
@@ -104,11 +107,12 @@ def main():
     print(f"{'='*60}")
 
     use_unsloth = False
+    is_mps = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
     try:
         from unsloth import FastLanguageModel
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=args.model,
-            max_seq_length=3500,
+            max_seq_length=args.max_seq_length,
             load_in_4bit=True,
             dtype=None,
         )
@@ -129,7 +133,6 @@ def main():
         print("Unsloth not available, using transformers + PEFT...")
         from transformers import AutoModelForCausalLM, AutoTokenizer
         from peft import LoraConfig
-        import torch
 
         # Determine device
         if torch.cuda.is_available():
@@ -223,6 +226,153 @@ def main():
 
     prompts_list = prompts  # Capture for closure
 
+    # --- Live Monitoring Callback ---
+    from collections import Counter
+    from transformers import TrainerCallback
+    from submission.shared.parse_action import parse_action as _parse_action, _ACTION_TAG_RE
+
+    class GRPOMonitorCallback(TrainerCallback):
+        """Logs real-time diagnostics every `eval_every` steps.
+
+        Tracks: action distribution, tag compliance, echo rate,
+        reward trend, and sample completions. Writes to monitor.jsonl
+        for live tailing with: tail -f grpo_runs/.../monitor.jsonl
+        """
+
+        def __init__(self, eval_prompts, tokenizer, output_dir, eval_every=10):
+            self.eval_prompts = eval_prompts[:8]  # 8 fixed prompts for consistency
+            self.tokenizer = tokenizer
+            self.monitor_file = Path(output_dir) / "monitor.jsonl"
+            self.eval_every = eval_every
+            self.reward_history = []  # (step, mean_reward)
+
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            """Capture reward from TRL's built-in logging."""
+            if logs and "reward" in logs:
+                self.reward_history.append((state.global_step, logs["reward"]))
+
+        def on_step_end(self, args, state, control, model=None, **kwargs):
+            step = state.global_step
+            if step % self.eval_every != 0 and step != 1:
+                return
+
+            if model is None:
+                return
+
+            model.eval()
+            results = []
+            action_counts = Counter()
+            tag_ok = 0
+            parse_ok = 0
+            echo_count = 0
+
+            for p in self.eval_prompts:
+                prompt_str = self.tokenizer.apply_chat_template(
+                    p["messages"], tokenize=False, add_generation_prompt=True,
+                )
+                inputs = self.tokenizer(prompt_str, return_tensors="pt")
+                device = next(model.parameters()).device
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+
+                with torch.no_grad():
+                    out = model.generate(
+                        **inputs, max_new_tokens=100,
+                        temperature=0.3, do_sample=True,
+                    )
+
+                response = self.tokenizer.decode(
+                    out[0][inputs["input_ids"].shape[1]:],
+                    skip_special_tokens=True,
+                )
+
+                has_tag = bool(_ACTION_TAG_RE.search(response))
+                parsed = _parse_action(response)
+                obs_text = p.get("observation_text", "")
+
+                if has_tag:
+                    tag_ok += 1
+                if parsed is not None:
+                    parse_ok += 1
+                    action_counts[parsed.action_type] += 1
+
+                # Echo detection
+                if obs_text and len(obs_text) > 20:
+                    out_tokens = set(response.lower().split())
+                    obs_tokens = set(obs_text.lower().split())
+                    if out_tokens and len(out_tokens & obs_tokens) / len(out_tokens) > 0.5:
+                        echo_count += 1
+
+                tag_closed = "</action>" in response
+                results.append({
+                    "action": parsed.action_type if parsed else "NONE",
+                    "has_tag": has_tag,
+                    "tag_closed": tag_closed,
+                    "snippet": response[:200],
+                    "len": len(response),
+                })
+
+            n = len(self.eval_prompts)
+            tag_pct = tag_ok / n * 100
+            parse_pct = parse_ok / n * 100
+            echo_pct = echo_count / n * 100
+            unique_actions = len(action_counts)
+
+            # Reward trend
+            recent_rewards = [r for s, r in self.reward_history if s > step - 20]
+            reward_avg = sum(recent_rewards) / len(recent_rewards) if recent_rewards else 0.0
+
+            # Build action distribution string
+            dist_str = " ".join(f"{a}={c}" for a, c in action_counts.most_common(5))
+
+            # Health verdict
+            issues = []
+            if echo_pct > 20:
+                issues.append(f"ECHO={echo_pct:.0f}%")
+            if parse_pct < 60:
+                issues.append(f"FORMAT_FAIL={100-parse_pct:.0f}%")
+            if unique_actions <= 1 and n > 2:
+                issues.append("ACTION_COLLAPSE")
+            if reward_avg < -0.15:
+                issues.append(f"REWARD_LOW={reward_avg:.3f}")
+
+            health = "HEALTHY" if not issues else "WARNING: " + ", ".join(issues)
+
+            # Print live
+            print(f"\n{'─'*60}")
+            print(f"MONITOR step={step} | reward_avg={reward_avg:+.3f} | "
+                  f"tag={tag_pct:.0f}% parse={parse_pct:.0f}% echo={echo_pct:.0f}%")
+            print(f"  actions: {dist_str}  ({unique_actions} unique)")
+            print(f"  status: {health}")
+            closed_count = sum(1 for r in results if r["tag_closed"])
+            avg_len = sum(r["len"] for r in results) / max(len(results), 1)
+            print(f"  closed_tag: {closed_count}/{n} | avg_chars: {avg_len:.0f}")
+            print(f"  sample: {results[0]['snippet']}")
+            print(f"{'─'*60}")
+
+            # Write to JSONL for offline analysis
+            record = {
+                "step": step,
+                "reward_avg": round(reward_avg, 4),
+                "tag_pct": round(tag_pct, 1),
+                "parse_pct": round(parse_pct, 1),
+                "echo_pct": round(echo_pct, 1),
+                "unique_actions": unique_actions,
+                "action_dist": dict(action_counts),
+                "health": health,
+                "sample": results[0]["snippet"],
+            }
+            with open(self.monitor_file, "a") as f:
+                f.write(json.dumps(record) + "\n")
+
+            model.train()
+
+    monitor_callback = GRPOMonitorCallback(
+        eval_prompts=prompts,
+        tokenizer=tokenizer,
+        output_dir=output_dir,
+        eval_every=10 if args.max_steps > 20 else 1,
+    )
+
     # Step 4: Configure and run GRPO training
     print(f"\n{'='*60}")
     print(f"Step 4: Training GRPO ({args.max_steps} steps)...")
@@ -238,9 +388,10 @@ def main():
 
         grpo_config = GRPOConfig(
             learning_rate=args.learning_rate,
-            per_device_train_batch_size=1,
+            per_device_train_batch_size=args.n_generations,
             gradient_accumulation_steps=4,
             num_generations=args.n_generations,
+            generation_batch_size=args.n_generations,
             max_completion_length=args.max_completion_length,
             num_train_epochs=1,
             max_steps=args.max_steps,
@@ -249,8 +400,12 @@ def main():
             report_to=report_to,
             output_dir=str(output_dir),
             seed=args.seed,
-            bf16=False,  # Gemma on MPS needs float32
+            bf16=False,
             fp16=False,
+            warmup_steps=max(1, int(args.max_steps * 0.05)),
+            lr_scheduler_type="cosine",
+            optim="adamw_torch",
+            dataloader_pin_memory=not is_mps,
         )
 
         trainer = GRPOTrainer(
@@ -260,6 +415,7 @@ def main():
             reward_funcs=reward_fn,
             processing_class=tokenizer,
             peft_config=peft_cfg,
+            callbacks=[monitor_callback],
         )
 
         print("Starting GRPO training...")
@@ -268,10 +424,28 @@ def main():
         elapsed = time.time() - start_time
         print(f"\nTraining complete! Elapsed: {elapsed/60:.1f} minutes")
 
-        # Save final adapter
-        model.save_pretrained(str(output_dir / "final_adapter"))
+        # Save final adapter (use trainer.model which has PEFT wrapper)
+        trained_model = trainer.model
+        trained_model.save_pretrained(str(output_dir / "final_adapter"))
         tokenizer.save_pretrained(str(output_dir / "final_adapter"))
         print(f"Saved adapter to {output_dir / 'final_adapter'}")
+
+        # Merge LoRA into base weights
+        try:
+            merged = trained_model.merge_and_unload()
+            merged_path = str(output_dir / "merged")
+            merged.save_pretrained(merged_path)
+            tokenizer.save_pretrained(merged_path)
+            print(f"Saved merged model to {merged_path}")
+        except Exception as e:
+            print(f"Merge skipped ({e}). LoRA adapters at {output_dir / 'final_adapter'}")
+
+        # Free memory
+        del model, trained_model, trainer
+        if is_mps:
+            torch.mps.empty_cache()
+        elif torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     except ImportError as e:
         print(f"\nTRL/datasets not available: {e}")

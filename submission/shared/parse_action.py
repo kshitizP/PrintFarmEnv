@@ -1,11 +1,12 @@
 """
 Strict action parser with Pydantic validation.
 
-Handles:
-  - Clean JSON
-  - JSON inside markdown fences
-  - JSON buried in free text
-  - Completely unparseable output → None (caller assigns WAIT + format penalty)
+Handles (in priority order):
+  1. <action>JSON</action> tags (preferred format)
+  2. Clean JSON
+  3. JSON inside markdown fences
+  4. JSON buried in free text
+  5. Completely unparseable output → None (caller assigns WAIT + format penalty)
 """
 
 import json
@@ -34,6 +35,10 @@ class AgentAction(BaseModel):
     reasoning: Optional[str] = Field(default=None, exclude=True)  # for inspection, not scored
 
 
+# Precompiled regex for <action> tag extraction
+_ACTION_TAG_RE = re.compile(r"<action>\s*(.*?)\s*</action>", re.DOTALL)
+
+
 def parse_action(text: str) -> Optional[AgentAction]:
     """Parse model output text into an AgentAction, or return None if unparseable."""
     if not text or not text.strip():
@@ -42,13 +47,22 @@ def parse_action(text: str) -> Optional[AgentAction]:
     text = text.strip()
     data = None
 
-    # 1. Try direct JSON parse
-    try:
-        data = json.loads(text)
-    except json.JSONDecodeError:
-        pass
+    # 1. Try <action>JSON</action> tags (preferred format)
+    tag_match = _ACTION_TAG_RE.search(text)
+    if tag_match:
+        try:
+            data = json.loads(tag_match.group(1))
+        except json.JSONDecodeError:
+            pass
 
-    # 2. Try extracting from markdown fences
+    # 2. Try direct JSON parse
+    if data is None:
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            pass
+
+    # 3. Try extracting from markdown fences
     if data is None:
         match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
         if match:
@@ -57,7 +71,7 @@ def parse_action(text: str) -> Optional[AgentAction]:
             except json.JSONDecodeError:
                 pass
 
-    # 3. Try extracting first JSON object from text
+    # 4. Try extracting first JSON object from text
     if data is None:
         match = re.search(r"\{[^{}]*\}", text)
         if match:

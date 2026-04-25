@@ -8,6 +8,7 @@ Used by GRPOTrainer as the reward function provider.
 """
 
 import copy
+import json
 import random
 from typing import Any, Dict, List, Tuple
 
@@ -16,7 +17,67 @@ from submission.env.models import FarmAction, FarmActionEnum
 from submission.shared.serialize import serialize_obs
 from submission.shared.parse_action import parse_action, action_to_farm_action, AgentAction
 from submission.shared.prompt import SYSTEM_PROMPT
+from submission.shared.obs_formatter import format_observation_as_text
 from submission.rewards.composite import compute_reward
+
+
+def _compress_obs_json(serialized: str) -> str:
+    """Compress serialized observation JSON to reduce token count.
+
+    Removes completed jobs, zero/default printer fields, trims logs,
+    and strips low-value top-level fields. Keeps all decision-critical
+    signals (operator_notes, customer_messages, anomaly_flags).
+    """
+    try:
+        obs = json.loads(serialized)
+    except (json.JSONDecodeError, ValueError):
+        return serialized
+
+    # Remove completed/cancelled jobs from active_queue
+    if "active_queue" in obs:
+        obs["active_queue"] = [
+            j for j in obs["active_queue"]
+            if j.get("state") not in ("COMPLETED", "CANCELLED")
+        ]
+        for j in obs["active_queue"]:
+            for k in list(j.keys()):
+                if j[k] in (0, 0.0, False, None, ""):
+                    del j[k]
+
+    # Drop default/zero printer fields
+    printer_defaults = {
+        "warmup_remaining": 0, "offline_remaining": 0,
+        "bed_drift_counter": 0.0, "reliability_penalty_active": False,
+        "outstanding_ticket_id": None, "current_job_id": None,
+        "revealed_this_step": False,
+    }
+    if "printers" in obs:
+        for p in obs["printers"]:
+            for k, default_val in printer_defaults.items():
+                if p.get(k) == default_val:
+                    p.pop(k, None)
+            if p.get("current_material") is None:
+                p.pop("current_material", None)
+
+    # Trim oversight_log to last 3 entries
+    if "oversight_log" in obs:
+        obs["oversight_log"] = obs["oversight_log"][-3:]
+
+    # Remove low-value top-level fields
+    for drop_key in ("ticket_events", "reward_breakdown", "total_labor_billed"):
+        obs.pop(drop_key, None)
+
+    # Compress operator entries
+    if "operators" in obs:
+        for op in obs["operators"]:
+            if op.get("current_ticket_id") is None:
+                op.pop("current_ticket_id", None)
+            if not op.get("pattern_recommendations"):
+                op.pop("pattern_recommendations", None)
+            if op.get("printer_visit_counts") == {}:
+                op.pop("printer_visit_counts", None)
+
+    return json.dumps(obs, separators=(",", ":"))
 
 
 def generate_decision_prompts(
@@ -47,9 +108,11 @@ def generate_decision_prompts(
         dp_env = DecisionPointEnv(k_horizon=K_HORIZON)
         serialized, obs = dp_env.reset(seed=ep_seed, task_id=task_id)
 
+        compressed = _compress_obs_json(serialized)
+        obs_text = format_observation_as_text(compressed)
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Current State:\n{serialized}"},
+            {"role": "user", "content": f"Current state:\n{obs_text}"},
         ]
 
         prompts.append({
@@ -59,6 +122,7 @@ def generate_decision_prompts(
             "seed": ep_seed,
             "ground_truth_tags": dp_env.get_decision_tags(),
             "decision_obs": obs,
+            "observation_text": obs_text,
         })
 
     return prompts
@@ -96,8 +160,12 @@ def evaluate_completion(
     rules_action = _rules_action(obs)
     rules_delta, _ = dp_env_rules.step(rules_action)
 
-    # Compute composite reward
-    return compute_reward(parsed, llm_delta, rules_delta, gt_tags)
+    # Compute composite reward (with anti-echo detection)
+    obs_text = prompt_info.get("observation_text", "")
+    return compute_reward(
+        parsed, llm_delta, rules_delta, gt_tags,
+        model_output=completion, observation_text=obs_text,
+    )
 
 
 def reward_function(completions: List[str], prompt_info: Dict[str, Any]) -> List[float]:

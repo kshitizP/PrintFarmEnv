@@ -25,6 +25,7 @@ from submission.env.models import FarmAction, FarmActionEnum
 from submission.shared.serialize import serialize_obs
 from submission.shared.parse_action import parse_action, action_to_farm_action
 from submission.shared.prompt import SYSTEM_PROMPT
+from submission.shared.obs_formatter import format_observation_as_text
 
 # ---------------------------------------------------------------------------
 # Global model state (loaded once)
@@ -112,7 +113,7 @@ def _api_extract(state_json: str) -> FarmAction:
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"Current State:\n{state_json}"},
+        {"role": "user", "content": f"Current state:\n{format_observation_as_text(state_json)}"},
     ]
 
     try:
@@ -141,7 +142,7 @@ def _local_extract(state_json: str) -> FarmAction:
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"Current State:\n{state_json}"},
+        {"role": "user", "content": f"Current state:\n{format_observation_as_text(state_json)}"},
     ]
 
     prompt = _tokenizer.apply_chat_template(

@@ -3,7 +3,7 @@ Composite reward function — sums all components and logs them separately.
 
 Components:
   r_economic:           net P&L delta vs rules baseline     [-1, +1]
-  r_format:             did output parse?                   {-0.1, 0.0}
+  r_format:             format + anti-echo                  [-0.3, +0.1]
   r_fault_precision:    correct investigation?              {-0.1, 0.0, +0.2}
   r_message_handling:   correct customer response?          [-0.05, +0.15]
   r_unnecessary_action: penalty for spam                    {-0.05, 0.0}
@@ -27,6 +27,8 @@ def compute_reward(
     llm_reward_delta: float,
     rules_reward_delta: float,
     ground_truth_tags: Dict[str, List[Dict[str, Any]]],
+    model_output: str = "",
+    observation_text: str = "",
 ) -> Dict[str, float]:
     """Compute all reward components and return as a dict.
 
@@ -35,6 +37,8 @@ def compute_reward(
         llm_reward_delta: reward delta from LLM action + K rule steps.
         rules_reward_delta: reward delta from K+1 rule steps (baseline).
         ground_truth_tags: {operator_notes: [...], customer_messages: [...], anomaly_flags: [...]}
+        model_output: raw model completion text (for anti-echo detection).
+        observation_text: the observation text sent in the prompt (for anti-echo detection).
 
     Returns:
         Dict with keys: r_economic, r_format, r_fault_precision,
@@ -46,7 +50,7 @@ def compute_reward(
 
     components = {
         "r_economic": r_economic(llm_reward_delta, rules_reward_delta),
-        "r_format": r_format(parsed_action),
+        "r_format": r_format(parsed_action, model_output=model_output, observation_text=observation_text),
         "r_fault_precision": r_fault_precision(parsed_action, anomaly_tags, note_tags),
         "r_message_handling": r_message_handling(parsed_action, msg_tags),
         "r_unnecessary_action": r_unnecessary_action(parsed_action, anomaly_tags, note_tags),
