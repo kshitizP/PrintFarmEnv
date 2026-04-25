@@ -19,7 +19,7 @@ hf jobs run \
   pytorch/pytorch:2.4.1-cuda12.1-cudnn9-devel \
   bash -c "
     set -e
-    pip install unsloth --quiet
+    pip install unsloth huggingface_hub --quiet
     cd /code
     python -m submission.training.merge_sft_hf \
       --adapter_repo sikkaBolega/printfarm-sft-adapter \

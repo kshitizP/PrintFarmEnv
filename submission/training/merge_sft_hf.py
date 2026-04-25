@@ -27,6 +27,8 @@ def parse_args():
                    help="HF Hub repo ID of the SFT LoRA adapter")
     p.add_argument("--merged_repo", default="sikkaBolega/printfarm-sft-merged",
                    help="HF Hub repo ID for the merged 16-bit model")
+    p.add_argument("--out", default="/tmp/sft-merged",
+                   help="Writable local staging dir (push_to_hub_merged needs writable fs)")
     p.add_argument("--max_seq_length", type=int, default=2048)
     p.add_argument("--no_push", action="store_true")
     return p.parse_args()
@@ -47,11 +49,25 @@ def main():
     )
     print("Adapter loaded.")
 
+    # push_to_hub_merged internally calls os.makedirs(save_directory) before uploading.
+    # /code is mounted read-only in HF Jobs, so we must stage to a writable path first,
+    # then upload with huggingface_hub.upload_folder.
+    import os
+    os.makedirs(args.out, exist_ok=True)
+    print(f"Saving merged 16-bit model to {args.out} ...")
+    model.save_pretrained_merged(args.out, tokenizer, save_method="merged_16bit")
+    print(f"Saved to {args.out}")
+
     if not args.no_push:
-        print(f"Merging + pushing 16-bit model to {args.merged_repo} ...")
-        model.push_to_hub_merged(
-            args.merged_repo, tokenizer,
-            save_method="merged_16bit", private=False,
+        print(f"Uploading to hub: {args.merged_repo} ...")
+        from huggingface_hub import HfApi
+        api = HfApi()
+        api.create_repo(args.merged_repo, repo_type="model", exist_ok=True, private=False)
+        api.upload_folder(
+            folder_path=args.out,
+            repo_id=args.merged_repo,
+            repo_type="model",
+            commit_message="Add merged 16-bit SFT model",
         )
         print(f"Done — https://huggingface.co/{args.merged_repo}")
         print(f"\nNow run GRPO with: --init_model {args.merged_repo}")
