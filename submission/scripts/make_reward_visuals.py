@@ -416,7 +416,7 @@ def make_hyperparameters_card(out_dir: Path):
     ax.axis("off")
 
     params = [
-        ("Model", "google/gemma-3-1b-it (local)  /  gemma-3-4b-it (HF Jobs)"),
+        ("Model", "Qwen/Qwen2.5-3B-Instruct (primary)  /  Qwen3-4B-Instruct (stretch)"),
         ("Training algo", "GRPO (Group Relative Policy Optimisation) via HF TRL"),
         ("LoRA rank", "16   |   LoRA alpha: 16   |   Target: q_proj, v_proj"),
         ("Learning rate", "5e-6   |   Warmup: 5% of max_steps"),

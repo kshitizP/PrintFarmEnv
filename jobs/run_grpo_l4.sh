@@ -25,7 +25,7 @@ hf jobs run \
     pip install unsloth trl peft datasets wandb --quiet
     cd /code
     python -m submission.training.train_grpo_hf \
-      --model google/gemma-3-1b-it \
+      --model Qwen/Qwen2.5-3B-Instruct \
       --init_adapter sikkaBolega/printfarm-sft-adapter \
       --max_steps 500 \
       --n_generations 8 \

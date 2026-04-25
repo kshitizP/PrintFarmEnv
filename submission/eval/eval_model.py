@@ -2,14 +2,14 @@
 Evaluate an LLM checkpoint on the PrintFarmEnv decision points.
 
 Usage:
-    # Evaluate untrained Gemma baseline
-    python -m submission.eval.eval_model --model google/gemma-3-1b-it
+    # Evaluate untrained Qwen baseline
+    python -m submission.eval.eval_model --model Qwen/Qwen2.5-3B-Instruct
 
     # Evaluate a trained LoRA adapter
-    python -m submission.eval.eval_model --model google/gemma-3-1b-it --adapter ./grpo_runs/latest/final_adapter
+    python -m submission.eval.eval_model --model Qwen/Qwen2.5-3B-Instruct --adapter ./grpo_runs/latest/final_adapter
 
     # Quick eval
-    python -m submission.eval.eval_model --model google/gemma-3-1b-it --n_episodes 5
+    python -m submission.eval.eval_model --model Qwen/Qwen2.5-3B-Instruct --n_episodes 5
 """
 
 import argparse
@@ -195,7 +195,7 @@ def eval_model(model, tokenizer, backend, n_episodes=20, seeds=None):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default="google/gemma-3-1b-it")
+    p.add_argument("--model", default="Qwen/Qwen2.5-3B-Instruct")
     p.add_argument("--adapter", default=None, help="LoRA adapter path")
     p.add_argument("--n_episodes", type=int, default=20)
     p.add_argument("--output", default=None,

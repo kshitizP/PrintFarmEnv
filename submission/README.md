@@ -178,7 +178,7 @@ python -m submission.training.train_grpo --smoke
 
 # real run
 python -m submission.training.train_grpo \
-  --model google/gemma-3-1b-it \
+  --model Qwen/Qwen2.5-3B-Instruct \
   --max_steps 200 \
   --n_generations 4 \
   --save_steps 25 \

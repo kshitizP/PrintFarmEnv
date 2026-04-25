@@ -43,7 +43,7 @@ import torch
 
 def parse_args():
     p = argparse.ArgumentParser(description="GRPO training (HF Jobs / Unsloth)")
-    p.add_argument("--model", default="google/gemma-3-1b-it")
+    p.add_argument("--model", default="Qwen/Qwen2.5-3B-Instruct")
     p.add_argument("--init_adapter", default=None,
                    help="SFT adapter — HF Hub repo ID or local path (strongly recommended)")
     p.add_argument("--max_steps", type=int, default=200)

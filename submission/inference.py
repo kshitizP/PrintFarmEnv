@@ -2,11 +2,11 @@
 Inference script for the PrintFarmEnv v2 submission.
 
 Supports two modes:
-  1. Local model (Gemma 3 with optional LoRA adapter)
+  1. Local model (Qwen 2.5 with optional LoRA adapter)
   2. OpenAI-compatible API (HF Inference Endpoints)
 
 Environment variables:
-  - MODEL_PATH: Path to local model or HF model name (default: google/gemma-3-1b-it)
+  - MODEL_PATH: Path to local model or HF model name (default: Qwen/Qwen2.5-3B-Instruct)
   - ADAPTER_PATH: Path to LoRA adapter (default: None)
   - API_BASE_URL: For API mode (overrides local model)
   - MODEL_NAME: For API mode
@@ -42,7 +42,7 @@ def _load_model():
     if _model is not None:
         return
 
-    model_path = os.getenv("MODEL_PATH", "google/gemma-3-1b-it")
+    model_path = os.getenv("MODEL_PATH", "Qwen/Qwen2.5-3B-Instruct")
     adapter_path = os.getenv("ADAPTER_PATH")
 
     # Check for adapter in submission directory
@@ -103,7 +103,7 @@ def _api_extract(state_json: str) -> FarmAction:
     from openai import OpenAI
 
     api_base = os.getenv("API_BASE_URL")
-    model_name = os.getenv("MODEL_NAME", "google/gemma-3-1b-it")
+    model_name = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct")
     api_key = (os.getenv("HF_TOKEN")
                or os.getenv("OPENAI_API_KEY")
                or os.getenv("API_KEY")

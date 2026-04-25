@@ -16,7 +16,7 @@ If any criterion fails, the SFT data needs work — fix it before GRPO.
 Usage:
     python -m submission.training.verify_sft \
         --adapter grpo_runs/sft_warm/final_adapter \
-        --base google/gemma-3-1b-it \
+        --base Qwen/Qwen2.5-3B-Instruct \
         --n 10
 """
 
@@ -55,7 +55,7 @@ GREEN = "\033[92m"; RED = "\033[91m"; YELLOW = "\033[93m"; BOLD = "\033[1m"; RES
 def parse_args():
     p = argparse.ArgumentParser(description="Verify SFT warm-start adapter")
     p.add_argument("--adapter", required=True, help="Path to SFT adapter")
-    p.add_argument("--base", default="google/gemma-3-1b-it", help="Base model")
+    p.add_argument("--base", default="Qwen/Qwen2.5-3B-Instruct", help="Base model")
     p.add_argument("--n", type=int, default=10, help="Number of test prompts")
     p.add_argument("--seed_offset", type=int, default=999_000)
     p.add_argument("--max_new_tokens", type=int, default=80)

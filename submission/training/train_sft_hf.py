@@ -37,7 +37,7 @@ for _c in [_here.parent, _here.parent.parent]:
 def parse_args():
     p = argparse.ArgumentParser(description="SFT warm-start (HF Jobs / Unsloth)")
     p.add_argument("--data", default="submission/data/sft_warm.jsonl")
-    p.add_argument("--model", default="google/gemma-3-1b-it")
+    p.add_argument("--model", default="Qwen/Qwen2.5-3B-Instruct")
     p.add_argument("--epochs", type=int, default=4)
     p.add_argument("--lora_rank", type=int, default=16)
     p.add_argument("--max_seq_length", type=int, default=2048)

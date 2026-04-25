@@ -25,7 +25,7 @@ hf jobs run \
     cd /code
     python -m submission.training.train_sft_hf \
       --data submission/data/sft_warm.jsonl \
-      --model google/gemma-3-1b-it \
+      --model Qwen/Qwen2.5-3B-Instruct \
       --epochs 4 \
       --batch_size 4 \
       --grad_accum 2 \

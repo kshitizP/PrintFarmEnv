@@ -13,7 +13,7 @@ Usage:
     # train the warm-start adapter
     python -m submission.training.train_sft \
         --data submission/data/sft_warm.jsonl \
-        --model google/gemma-3-1b-it \
+        --model Qwen/Qwen2.5-3B-Instruct \
         --epochs 4 \
         --out grpo_runs/sft_warm
 """
@@ -39,13 +39,14 @@ def parse_args():
     p = argparse.ArgumentParser(description="SFT warm-start training")
     p.add_argument("--data", default="submission/data/sft_warm.jsonl",
                    help="Path to JSONL dataset")
-    p.add_argument("--model", default="google/gemma-3-1b-it")
+    p.add_argument("--model", default="Qwen/Qwen2.5-3B-Instruct")
     p.add_argument("--out", default="grpo_runs/sft_warm",
                    help="Output directory for adapter")
     p.add_argument("--epochs", type=int, default=4)
     p.add_argument("--learning_rate", type=float, default=2e-4)
     p.add_argument("--lora_rank", type=int, default=16)
-    p.add_argument("--max_seq_length", type=int, default=2048)
+    p.add_argument("--max_seq_length", type=int, default=1500,
+                   help="MPS-safe default; covers 88%% of examples without truncation")
     p.add_argument("--batch_size", type=int, default=2)
     p.add_argument("--grad_accum", type=int, default=4)
     p.add_argument("--seed", type=int, default=42)
@@ -100,6 +101,10 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    # Truncate from the LEFT so the <action> tag at the end is never cut.
+    # Without this, right-truncation silently removes the action from long
+    # examples → completion_only_loss sees no target tokens → zero signal.
+    tokenizer.truncation_side = "left"
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
@@ -140,7 +145,8 @@ def main():
         warmup_ratio=0.1,
         lr_scheduler_type="cosine",
         dataloader_pin_memory=not is_mps,
-        gradient_checkpointing=False,
+        dataloader_num_workers=0,  # MPS requires 0; avoids semaphore leaks
+        gradient_checkpointing=True,  # recompute activations → ~40% less peak VRAM
         completion_only_loss=True,  # mask the prompt; only learn the action
     )
 

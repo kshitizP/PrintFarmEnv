@@ -1,7 +1,7 @@
 """
 GRPO Training Script for PrintFarmEnv.
 
-Designed for Unsloth + TRL GRPOTrainer on Colab T4 (Gemma 3 1B).
+Designed for Unsloth + TRL GRPOTrainer on T4/L4 (Qwen2.5-3B-Instruct).
 Can be run locally for smoke tests or on HF for full training.
 
 Usage:
@@ -11,8 +11,8 @@ Usage:
     # Full overnight run
     python -m submission.training.train_grpo --max_steps 200 --output ./grpo_runs/overnight
 
-    # With Gemma 3 4B (for HF credits)
-    python -m submission.training.train_grpo --model google/gemma-3-4b-it --max_steps 500
+    # With Qwen 3 4B (stretch goal — for HF Jobs L4)
+    python -m submission.training.train_grpo --model Qwen/Qwen3-4B-Instruct --max_steps 500
 """
 
 import argparse
@@ -34,8 +34,8 @@ for _candidate in [_here.parent, _here.parent.parent]:
 
 def parse_args():
     p = argparse.ArgumentParser(description="GRPO training for PrintFarmEnv")
-    p.add_argument("--model", default="google/gemma-3-1b-it",
-                   help="Base model (default: gemma-3-1b-it)")
+    p.add_argument("--model", default="Qwen/Qwen2.5-3B-Instruct",
+                   help="Base model (default: Qwen2.5-3B-Instruct)")
     p.add_argument("--max_steps", type=int, default=200,
                    help="Max training steps")
     p.add_argument("--n_prompts", type=int, default=100,
@@ -156,7 +156,7 @@ def main():
             torch_dtype = torch.float16
         elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
             device_map = "mps"
-            torch_dtype = torch.float32  # Gemma on MPS needs float32
+            torch_dtype = torch.float32  # MPS needs float32 for stability
         else:
             device_map = "cpu"
             torch_dtype = torch.float32
