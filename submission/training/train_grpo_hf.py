@@ -90,19 +90,36 @@ def main():
     print(f"\n{'='*60}\nStep 2: Loading {args.model} with Unsloth\n{'='*60}")
     from unsloth import FastLanguageModel
 
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=args.model,
-        max_seq_length=args.max_seq_length,
-        load_in_4bit=True,
-        dtype=None,
-    )
+    # Detect bf16 support early — needed for both load dtype and bf16 flag later.
+    bf16_ok = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    target_dtype = torch.bfloat16 if bf16_ok else torch.float16
+    print(f"Mixed precision: {'bf16' if bf16_ok else 'fp16'}")
 
     if args.init_adapter:
+        # When merging an SFT adapter we skip 4-bit quantization: merge_and_unload()
+        # would dequantize to float32 anyway, leaving a dtype mismatch (bf16 activations
+        # vs float32 weights). Loading full-precision from the start is cleaner and
+        # fits in 24 GB (3B × 2 B ≈ 6 GB + GRPO buffers ≈ 20–22 GB total on L4).
+        print(f"Loading base at {target_dtype} (no 4-bit) for dtype-safe adapter merge...")
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name=args.model,
+            max_seq_length=args.max_seq_length,
+            load_in_4bit=False,
+            dtype=target_dtype,
+        )
         print(f"Merging SFT adapter from {args.init_adapter} into base...")
         from peft import PeftModel
         sft = PeftModel.from_pretrained(model, args.init_adapter)
         model = sft.merge_and_unload()
-        print("SFT adapter merged — GRPO will train a fresh LoRA on top")
+        model = model.to(target_dtype)  # guard against any float32 residue
+        print(f"SFT adapter merged → {target_dtype} — GRPO will train a fresh LoRA on top")
+    else:
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name=args.model,
+            max_seq_length=args.max_seq_length,
+            load_in_4bit=True,
+            dtype=None,
+        )
 
     model = FastLanguageModel.get_peft_model(
         model,
@@ -264,6 +281,7 @@ def main():
     import os
     use_wandb = bool(os.environ.get("WANDB_API_KEY"))
     print(f"W&B logging: {'ENABLED' if use_wandb else 'DISABLED (no WANDB_API_KEY)'}")
+    # bf16_ok / target_dtype already detected in Step 2
 
     grpo_config = GRPOConfig(
         output_dir=str(out_dir),
@@ -279,8 +297,8 @@ def main():
         logging_steps=1,
         report_to="wandb" if use_wandb else "none",
         seed=args.seed,
-        bf16=True,
-        fp16=False,
+        bf16=bf16_ok,
+        fp16=not bf16_ok,
         warmup_steps=max(1, int(args.max_steps * 0.05)),
         lr_scheduler_type="cosine",
         optim="adamw_torch",
