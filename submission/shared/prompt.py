@@ -26,7 +26,6 @@ RUN_DIAGNOSTIC: {"action_type":"RUN_DIAGNOSTIC","printer_id":<int>}
 DISPATCH_TICKET: {"action_type":"DISPATCH_TICKET","printer_id":<int>,"operator_id":"<str>","ticket_type":"<str>"}
 REQUEST_SPOOL_SWAP: {"action_type":"REQUEST_SPOOL_SWAP","printer_id":<int>,"material":"<str>"}
 REQUEST_MAINTENANCE: {"action_type":"REQUEST_MAINTENANCE","printer_id":<int>,"maintenance_type":"maintenance_basic"}
-OVERRIDE_OPERATOR: {"action_type":"OVERRIDE_OPERATOR","ticket_id":"<str>","reason":"<str>"}
 WAIT: {"action_type":"WAIT"}
 
 === SENSOR RULES ===
