@@ -66,8 +66,15 @@ def load_model(model_name, adapter_path=None):
         dtype = torch.float32
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # On MPS/CPU bitsandbytes is unavailable — patch any saved bnb quantization
+    # config out of the model config before loading so transformers doesn't try
+    # to instantiate a bnb quantizer.
+    from transformers import AutoConfig
+    cfg = AutoConfig.from_pretrained(model_name)
+    if getattr(cfg, "quantization_config", None) is not None:
+        del cfg.quantization_config
     model = AutoModelForCausalLM.from_pretrained(
-        model_name, torch_dtype=dtype, device_map=device,
+        model_name, config=cfg, dtype=dtype, device_map=device,
     )
 
     if adapter_path:
