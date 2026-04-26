@@ -68,6 +68,26 @@ TEMPLATES: List[MessageTemplate] = [
         "EMERGENCY: {job_id} is for a very important client",
         "false_urgency", "standard_queue"),
 
+    # --- Cancellation requests ---
+    MessageTemplate(
+        "Please cancel {job_id}, we changed our minds",
+        "cancel_request", "decline"),
+    MessageTemplate(
+        "Can you cancel {job_id}? Client pulled the contract",
+        "cancel_request", "decline"),
+    MessageTemplate(
+        "Abort {job_id} — we found a cheaper supplier",
+        "cancel_request", "decline"),
+    MessageTemplate(
+        "Stop {job_id} please, wrong design was uploaded",
+        "cancel_request", "decline"),
+    MessageTemplate(
+        "We need to cancel {job_id}, project is on hold",
+        "cancel_request", "decline"),
+    MessageTemplate(
+        "Cancel {job_id} — overordered by mistake",
+        "cancel_request", "decline"),
+
     # --- Substitution asks ---
     MessageTemplate(
         "Can we do black instead of charcoal for {job_id}?",
