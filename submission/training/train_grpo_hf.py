@@ -331,12 +331,20 @@ def main():
         tokenizer.push_to_hub(args.hub_adapter_repo, private=False)
         print(f"Adapter: https://huggingface.co/{args.hub_adapter_repo}")
 
-        # Push merged 16-bit model via standard PEFT merge + huggingface_hub upload
+        # Push merged 16-bit model — reload original base in fp16 THEN merge.
+        # Do NOT call merge_and_unload() on the 4-bit training model: that
+        # dequantizes 4-bit → 16-bit before merging, baking in quantization noise.
+        # Correct path: fresh fp16 base + saved adapter → merge → save.
         print(f"\nMerging + pushing to {args.hub_merged_repo} ...")
         import os
+        from transformers import AutoModelForCausalLM as _AMCL
+        from peft import PeftModel as _PeftModel
         merged_path = "/tmp/grpo-merged"
         os.makedirs(merged_path, exist_ok=True)
-        merged_model = trainer.model.merge_and_unload()
+        print("  Loading original base in fp16 for clean merge...")
+        _base = _AMCL.from_pretrained(args.model, torch_dtype=torch.float16, device_map="cpu")
+        _peft = _PeftModel.from_pretrained(_base, str(adapter_path))
+        merged_model = _peft.merge_and_unload()
         merged_model.save_pretrained(merged_path)
         tokenizer.save_pretrained(merged_path)
         from huggingface_hub import HfApi
