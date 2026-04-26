@@ -1,3 +1,14 @@
+---
+title: PrintFarmEnv
+emoji: 🖨️
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+tags:
+  - openenv
+---
+
 # PrintFarm Dispatcher — OpenEnv Submission
 
 > **OpenEnv Hackathon 2025** · Reinforcement learning for LLM-driven 3D print-farm operations
@@ -124,14 +135,25 @@ sikkaBolega/printfarm-grpo-adapter  ← submission model
 The full pipeline runs on HuggingFace Jobs. A re-runnable demo is in the Colab notebook.
 
 ```bash
-# Step 1 — SFT (~12 min, T4)
-bash jobs/run_sft.sh --detach
+# Step 1 — SFT (~12 min, T4 via HF Jobs)
+python -m submission.training.train_sft_hf \
+  --data data/sft_warm.jsonl \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --epochs 4 --batch_size 4 \
+  --hub_repo sikkaBolega/printfarm-sft-adapter
 
-# Step 2 — Merge SFT adapter (~10 min, T4)
-bash jobs/merge_sft.sh --detach
+# Step 2 — Merge SFT adapter to fp16
+python -m submission.training.merge_sft_hf \
+  --adapter_repo sikkaBolega/printfarm-sft-adapter \
+  --merged_repo sikkaBolega/printfarm-sft-merged
 
 # Step 3 — GRPO (500 steps, ~6 hrs, L4)
-bash jobs/run_grpo_l4.sh --detach
+python -m submission.training.train_grpo_hf \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --init_model sikkaBolega/printfarm-sft-merged \
+  --max_steps 500 --n_generations 8 \
+  --hub_adapter_repo sikkaBolega/printfarm-grpo-adapter \
+  --hub_merged_repo sikkaBolega/printfarm-grpo-merged
 ```
 
 **Colab notebook** (re-runnable, ~20 min on T4): [notebooks/PrintFarmEnv_Training.ipynb](notebooks/PrintFarmEnv_Training.ipynb)
@@ -232,7 +254,7 @@ python -m submission.eval.run_baselines
 ## 7. Repository Layout
 
 ```
-submission/
+./
 ├── env/
 │   ├── env.py                   # PrintFarmEnvironment (discrete-event sim)
 │   ├── decision_point.py        # DecisionPointEnv + round-robin signal targeting
@@ -278,13 +300,6 @@ submission/
 └── requirements.txt
 ```
 
-```
-jobs/                            # HF Jobs launch scripts
-├── run_sft.sh                   # T4 SFT job
-├── merge_sft.sh                 # T4 merge job
-├── run_grpo_l4.sh               # L4 GRPO job (500 steps)
-└── run_grpo_a100.sh             # A100 GRPO job (alternative)
-```
 
 ---
 
