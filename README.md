@@ -15,6 +15,17 @@ A trust-and-coordination layer for 3D print farm software — an AI Dispatcher t
 
 **Themes:** Multi-Agent Interactions (Theme 1) · Zero-Trust Sensor Handling (Theme 5) · Long-Horizon Planning (Theme 2) · World Modeling (Theme 3.1)
 
+## Submission Materials
+
+| Resource | Link |
+|---|---|
+| **Live Environment (HF Space)** | https://huggingface.co/spaces/sikkaBolega/printfarm-env |
+| **Colab Training Notebook** | [submission/notebooks/PrintFarmEnv_Training.ipynb](submission/notebooks/PrintFarmEnv_Training.ipynb) |
+| **Submission README + Results** | [submission/README.md](submission/README.md) |
+| **Trained GRPO Adapter** | https://huggingface.co/sikkaBolega/printfarm-grpo-adapter |
+| **Trained Merged Model** | https://huggingface.co/sikkaBolega/printfarm-grpo-merged |
+| **Training Plots** | [submission/plots/](submission/plots/) |
+
 ## Motivation
 
 Farms with 10–100+ networked printers must coordinate job scheduling, human technicians, degrading sensors, and tight customer SLAs — simultaneously. Current solutions are either manual or rigid rule-based. PrintFarmEnv forces an AI agent to survive all three challenges at once under a realistic dollar-denominated cost model. A trained agent can be pointed at a real farm's OctoPrint REST API — the simulator is the training ground, not the endgame.
