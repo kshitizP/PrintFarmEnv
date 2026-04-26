@@ -1,0 +1,340 @@
+{
+  "n_episodes": 11,
+  "format_failure_rate": 0.0,
+  "avg_reward": -0.02286591188835244,
+  "avg_components": {
+    "r_format": -0.09999999999999999,
+    "r_economic": -0.00013863916107970591,
+    "r_fault_precision": 0.0,
+    "r_message_handling": 0.07727272727272728,
+    "r_unnecessary_action": 0.0,
+    "r_novel_fault": 0.0,
+    "safety_gate": 1.0,
+    "total": -0.02286591188835244
+  },
+  "action_distribution": {
+    "ASSIGN_JOB": 7,
+    "WAIT": 4
+  },
+  "episodes": [
+    {
+      "episode": 0,
+      "task_id": "task_1",
+      "seed": 42,
+      "completion": "<action>{\"action_type\": \"ASSIGN_JOB\", \"printer_id\": 7, \"job_id\": \"j3\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 7,
+        "job_id": "j3",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": 0.29913800653594774,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": -0.0008619934640522898,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.4,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": 0.29913800653594774
+      },
+      "gen_time": 8.422893762588501
+    },
+    {
+      "episode": 1,
+      "task_id": "task_2",
+      "seed": 43,
+      "completion": "<action>{\"action_type\": \"ASSIGN_JOB\", \"printer_id\": 1, \"job_id\": \"j1\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 1,
+        "job_id": "j1",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": 0.04986571428571428,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": -0.00013428571428571791,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.15,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": 0.04986571428571428
+      },
+      "gen_time": 6.199875831604004
+    },
+    {
+      "episode": 2,
+      "task_id": "task_3",
+      "seed": 44,
+      "completion": "<action>{\"action_type\":\"ASSIGN_JOB\",\"printer_id\":1,\"job_id\":\"j1\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 1,
+        "job_id": "j1",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": 0.299864,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": -0.00013599999999999835,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.4,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": 0.299864
+      },
+      "gen_time": 5.3514111042022705
+    },
+    {
+      "episode": 3,
+      "task_id": "task_4",
+      "seed": 45,
+      "completion": "<action>{\"action_type\":\"ASSIGN_JOB\",\"printer_id\":1,\"job_id\":\"j1\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 1,
+        "job_id": "j1",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.10012597014925374,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": -0.00012597014925373352,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.10012597014925374
+      },
+      "gen_time": 6.817620038986206
+    },
+    {
+      "episode": 4,
+      "task_id": "task_5",
+      "seed": 46,
+      "completion": "<action>{\"action_type\": \"WAIT\"}</action>",
+      "parsed": {
+        "action_type": "WAIT",
+        "printer_id": null,
+        "job_id": null,
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.1,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": 0.0,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.1
+      },
+      "gen_time": 7.919174909591675
+    },
+    {
+      "episode": 5,
+      "task_id": "task_1",
+      "seed": 47,
+      "completion": "<action>{\"action_type\":\"ASSIGN_JOB\",\"printer_id\":7,\"job_id\":\"j6\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 7,
+        "job_id": "j6",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.10014352941176471,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": -0.00014352941176470346,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.10014352941176471
+      },
+      "gen_time": 8.05415391921997
+    },
+    {
+      "episode": 6,
+      "task_id": "task_2",
+      "seed": 48,
+      "completion": "<action>{\"action_type\":\"WAIT\"}</action>",
+      "parsed": {
+        "action_type": "WAIT",
+        "printer_id": null,
+        "job_id": null,
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.2,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": 0.0,
+        "r_fault_precision": 0.0,
+        "r_message_handling": -0.1,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.2
+      },
+      "gen_time": 4.386405944824219
+    },
+    {
+      "episode": 7,
+      "task_id": "task_3",
+      "seed": 49,
+      "completion": "<action>{\"action_type\":\"WAIT\"}</action>",
+      "parsed": {
+        "action_type": "WAIT",
+        "printer_id": null,
+        "job_id": null,
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.1,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": 0.0,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.1
+      },
+      "gen_time": 3.8501808643341064
+    },
+    {
+      "episode": 8,
+      "task_id": "task_4",
+      "seed": 50,
+      "completion": "<action>{\"action_type\":\"WAIT\"}</action>",
+      "parsed": {
+        "action_type": "WAIT",
+        "printer_id": null,
+        "job_id": null,
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.1,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": 0.0,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.1
+      },
+      "gen_time": 5.784219980239868
+    },
+    {
+      "episode": 9,
+      "task_id": "task_5",
+      "seed": 51,
+      "completion": "<action>{\"action_type\": \"ASSIGN_JOB\", \"printer_id\": 1, \"job_id\": \"u1\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 1,
+        "job_id": "u1",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.10012325203252033,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": -0.00012325203252032236,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.10012325203252033
+      },
+      "gen_time": 9.756061792373657
+    },
+    {
+      "episode": 10,
+      "task_id": "task_1",
+      "seed": 52,
+      "completion": "<action>{\"action_type\":\"ASSIGN_JOB\",\"printer_id\":7,\"job_id\":\"j3\"}</action>",
+      "parsed": {
+        "action_type": "ASSIGN_JOB",
+        "printer_id": 7,
+        "job_id": "j3",
+        "operator_id": null,
+        "ticket_type": null,
+        "ticket_id": null,
+        "material": null,
+        "maintenance_type": null,
+        "reason": null
+      },
+      "reward": -0.1,
+      "components": {
+        "r_format": -0.1,
+        "r_economic": 0.0,
+        "r_fault_precision": 0.0,
+        "r_message_handling": 0.0,
+        "r_unnecessary_action": 0.0,
+        "r_novel_fault": 0.0,
+        "safety_gate": 1.0,
+        "total": -0.1
+      },
+      "gen_time": 8.164324760437012
+    }
+  ]
+}
