@@ -294,6 +294,7 @@ def main():
         max_steps=args.max_steps,
         save_steps=args.save_steps,
         logging_steps=1,
+        eval_strategy="no",
         report_to="wandb" if use_wandb else "none",
         seed=args.seed,
         bf16=bf16_ok,
@@ -336,9 +337,14 @@ def main():
         # dequantizes 4-bit → 16-bit before merging, baking in quantization noise.
         # Correct path: fresh fp16 base + saved adapter → merge → save.
         print(f"\nMerging + pushing to {args.hub_merged_repo} ...")
-        import os
+        import gc, os
         from transformers import AutoModelForCausalLM as _AMCL
         from peft import PeftModel as _PeftModel
+        # Free training model VRAM before loading fp16 base (avoids OOM on L4)
+        del trainer
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         merged_path = "/tmp/grpo-merged"
         os.makedirs(merged_path, exist_ok=True)
         print("  Loading original base in fp16 for clean merge...")

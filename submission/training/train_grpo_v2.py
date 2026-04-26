@@ -326,6 +326,9 @@ def main():
         max_steps=args.max_steps,
         save_steps=args.save_steps,
         logging_steps=1,
+        # Disable built-in eval loop: evaluation is handled entirely by
+        # MonitorCallback (held-out grpo_eval.jsonl, every monitor_every steps).
+        eval_strategy="no",
         report_to="wandb" if use_wandb else "none",
         seed=args.seed,
         bf16=bf16_ok,
